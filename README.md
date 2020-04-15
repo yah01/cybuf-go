@@ -1,2 +1,2 @@
-# cy-go
-a go lib for marshal&amp;unmarshal cy format data
+# cybuf-go
+a go lib for marshal&unmarshal cybuf format data
