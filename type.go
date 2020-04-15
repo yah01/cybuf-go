@@ -1,11 +1,14 @@
 package cybuf
 
-type cyType int
-
+type CybufType int
 const (
-	Number = iota
-	Decimal
-	String
-	Array
-	Object
+	CybufType_Number CybufType = iota
+	CybufType_Decimal
+	CybufType_String
+	CybufType_Array
+	CybufType_Object
 )
+
+func GetCybufType(value []rune) CybufType {
+
+}
