@@ -1,6 +1,9 @@
 package cybuf
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+)
 
 type InvalidUnmarshalError struct {
 	Type reflect.Type
@@ -15,4 +18,22 @@ func (e *InvalidUnmarshalError) Error() string {
 		return "cybuf: Unmarshal(non-pointer " + e.Type.String() + ")"
 	}
 	return "cybuf: Unmarshal(nil " + e.Type.String() + ")"
+}
+
+type ParseStage string
+
+const (
+	ParseStage_Key   ParseStage = "key"
+	ParseStage_Colon ParseStage = "colon"
+	ParseStage_Value ParseStage = "value"
+)
+
+type ParseError struct {
+	Stage ParseStage
+	Index int
+	Char  rune
+}
+
+func (e *ParseError) Error() string {
+	return fmt.Sprintf("cybuf: Can't parse from %d(%v) when finding %v", e.Index, e.Char, e.Stage)
 }
