@@ -1,2 +1,2 @@
 # cybuf-go
-a go lib for marshal&unmarshal cybuf format data
+a go package for marshal&unmarshal cybuf format data
