@@ -2,7 +2,6 @@ package cybuf
 
 import (
 	"reflect"
-	"strings"
 	"unicode"
 )
 
@@ -21,18 +20,36 @@ func Unmarshal(data []byte, v interface{}) error {
 
 func unmarshal(data []rune, v interface{}) error {
 	var (
-		FindKey   bool
-		FindValue bool
-		InString  bool
-		InMap     bool
-		InArray   bool
+		key   []rune
+		value []rune
 	)
 
-	for i := 0; i < len(data); i++ {
-		c := data[i]
+	for i := 0; i < len(data); {
+		key, i = nextKey(data, i)
+		if key == nil {
+			return &ParseError{
+				Stage: ParseStage_Key,
+				Index: i,
+				Char:  data[i],
+			}
+		}
 
-		switch c {
-		case ''
+		i = nextColon(data, i)
+		if i==-1 {
+			return &ParseError{
+				Stage: ParseStage_Colon,
+				Index: i,
+				Char:  data[i],
+			}
+		}
+
+		value,i = nextValue(data,i)
+		if value==nil {
+			return &ParseError{
+				Stage: ParseStage_Value,
+				Index: i,
+				Char:  data[i],
+			}
 		}
 	}
 
@@ -74,7 +91,7 @@ func nextColon(data []rune, offset int) int {
 	return -1
 }
 
-func nextValue(data []rune,offset int) ([]rune,int) {
+func nextValue(data []rune, offset int) ([]rune, int) {
 
 }
 
