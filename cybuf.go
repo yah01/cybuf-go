@@ -1,11 +1,23 @@
 package cybuf
 
 import (
+	"log"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
 	"unicode"
 )
+
+var (
+	debugLog *log.Logger
+	errorLog *log.Logger
+)
+
+func init() {
+	debugLog = log.New(os.Stdout, "Debug ", log.LstdFlags|log.Lshortfile)
+	errorLog = log.New(os.Stdout, "Error ", log.LstdFlags|log.Lshortfile)
+}
 
 func Unmarshal(data []byte, v interface{}) error {
 	rv := reflect.ValueOf(v)
@@ -16,7 +28,6 @@ func Unmarshal(data []byte, v interface{}) error {
 	}
 
 	realData := []rune(string(data))
-
 	return unmarshal(realData, v)
 }
 
@@ -30,19 +41,21 @@ func unmarshal(data []rune, v interface{}) error {
 	rv := v.(*map[string]interface{})
 	for i := 0; i < len(data); {
 
-		//log.Println("nextKey:")
 		key, i = nextKey(data, i)
 		if key == nil {
+			if i == len(data) {
+				return nil
+			}
 			return &ParseError{
 				Stage: ParseStage_Key,
 				Index: i,
 				Char:  data[i],
 			}
 		}
+		keyStr := string(key)
 		// todo check key
-		//log.Println("key:", string(key))
+		debugLog.Println("key:", keyStr)
 
-		//log.Println("nextColon:")
 		i = nextColon(data, i)
 		if i == -1 {
 			return &ParseError{
@@ -51,9 +64,7 @@ func unmarshal(data []rune, v interface{}) error {
 				Char:  data[i],
 			}
 		}
-		//log.Println("colon:", string(data[i-1]))
 
-		//log.Println("nextValue:")
 		value, valueType, i = nextValue(data, i)
 		if value == nil {
 			return &ParseError{
@@ -62,19 +73,31 @@ func unmarshal(data []rune, v interface{}) error {
 				Char:  data[i],
 			}
 		}
-
-		//log.Println(key, value, valueType)
+		valueStr := string(value)
+		debugLog.Println("value: "+string(value)+", valueType:", valueType)
 		switch valueType {
 		case CybufType_Nil:
-			(*rv)[string(key)] = nil
+			(*rv)[keyStr] = nil
 		case CybufType_Number:
-			(*rv)[string(key)], _ = strconv.ParseInt(string(value), 10, 64)
+			(*rv)[keyStr], _ = strconv.ParseInt(valueStr, 10, 64)
 		case CybufType_Decimal:
-			(*rv)[string(key)], _ = strconv.ParseFloat(string(value), 64)
+			(*rv)[keyStr], _ = strconv.ParseFloat(valueStr, 64)
 		case CybufType_String:
-			(*rv)[string(key)] = strings.Trim(string(value), `'"`)
+			(*rv)[keyStr] = strings.Trim(valueStr, `'"`)
+		case CybufType_Array:
+		// todo
+		case CybufType_Object:
+			var object = make(map[string]interface{})
+			err := unmarshal([]rune(strings.Trim(valueStr, "{}")), &object)
+			if err != nil {
+				errorLog.Println(err)
+				return err
+			}
+			debugLog.Println(object)
+			(*rv)[keyStr] = object
 		}
-		//log.Println(*rv)
+
+		debugLog.Println("parsed:", keyStr, valueStr)
 	}
 
 	return nil
@@ -117,7 +140,6 @@ func nextValue(data []rune, offset int) ([]rune, CybufType, int) {
 		offset++
 	}
 	if offset == len(data) {
-		//log.Println("offset == len(data)")
 		return nil, CybufType_Nil, offset
 	}
 
@@ -137,9 +159,7 @@ func nextValue(data []rune, offset int) ([]rune, CybufType, int) {
 	}
 
 	if IsBoundChar(data[offset]) {
-		//log.Println("IsBoundChar")
 		value, offset = findRightBound(data, offset)
-		//log.Println(value, valueType, offset)
 		return value, valueType, offset
 	} else {
 		for offset < len(data) && !unicode.IsSpace(data[offset]) {
@@ -180,7 +200,6 @@ func findRightBound(data []rune, offset int) ([]rune, int) {
 		}
 
 		if leftBoundCount == 0 {
-			//log.Println("data:", data[start:offset+1])
 			return data[start : offset+1], offset + 1
 		}
 

@@ -6,9 +6,14 @@ import (
 )
 
 func main() {
-	cybufBytes := []byte(`Name : "cybuf"
+	cybufBytes := []byte(`
+Name : "cybuf"
 Age : 1
-Weight : 100.2`)
+Weight : 100.2
+Fuck : {
+Name : "you"
+Age : 99
+}`)
 
 	testMap := map[string]interface{}{}
 
