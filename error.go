@@ -37,3 +37,14 @@ type ParseError struct {
 func (e *ParseError) Error() string {
 	return fmt.Sprintf("cybuf: Can't parse from %d(%s) when finding %s", e.Index, string(e.Char), e.Stage)
 }
+
+type DecodeError string
+
+const (
+	DecodeError_Not_Found_Begin DecodeError = "not found beginning('{')"
+	DecodeError_Not_Found_End   DecodeError = "not found ending('}')"
+)
+
+func (e DecodeError) Error() string {
+	return fmt.Sprintf("cybuf: Error happens when decoding: %s", e)
+}
