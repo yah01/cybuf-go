@@ -1,8 +1,10 @@
 package cybuf
 
 import (
+	"log"
 	"reflect"
 	"strconv"
+	"strings"
 	"unicode"
 )
 
@@ -26,7 +28,10 @@ func unmarshal(data []rune, v interface{}) error {
 		valueType CybufType
 	)
 
+	rv := v.(*map[string]interface{})
 	for i := 0; i < len(data); {
+
+		log.Println("nextKey:")
 		key, i = nextKey(data, i)
 		if key == nil {
 			return &ParseError{
@@ -35,7 +40,10 @@ func unmarshal(data []rune, v interface{}) error {
 				Char:  data[i],
 			}
 		}
+		// todo check key
+		log.Println("key:", string(key))
 
+		log.Println("nextColon:")
 		i = nextColon(data, i)
 		if i == -1 {
 			return &ParseError{
@@ -44,7 +52,9 @@ func unmarshal(data []rune, v interface{}) error {
 				Char:  data[i],
 			}
 		}
+		log.Println("colon:", string(data[i-1]))
 
+		log.Println("nextValue:")
 		value, valueType, i = nextValue(data, i)
 		if value == nil {
 			return &ParseError{
@@ -53,6 +63,19 @@ func unmarshal(data []rune, v interface{}) error {
 				Char:  data[i],
 			}
 		}
+
+		log.Println(key, value, valueType)
+		switch valueType {
+		case CybufType_Nil:
+			(*rv)[string(key)] = nil
+		case CybufType_Number:
+			(*rv)[string(key)], _ = strconv.ParseInt(string(value), 10, 64)
+		case CybufType_Decimal:
+			(*rv)[string(key)], _ = strconv.ParseFloat(string(value), 64)
+		case CybufType_String:
+			(*rv)[string(key)] = strings.Trim(string(value), `'"`)
+		}
+		log.Println(*rv)
 	}
 
 	return nil
@@ -69,7 +92,7 @@ func nextKey(data []rune, offset int) ([]rune, int) {
 	start := offset
 
 	// Find key until meet the first space character of colon
-	for c := data[offset]; !unicode.IsSpace(c) && c != ':'; c = data[offset] {
+	for c := data[offset]; offset < len(data) && !unicode.IsSpace(c) && c != ':'; c = data[offset] {
 		offset++
 	}
 	if offset == len(data) {
@@ -82,7 +105,7 @@ func nextKey(data []rune, offset int) ([]rune, int) {
 func nextColon(data []rune, offset int) int {
 	for i := offset; i < len(data); i++ {
 		if data[i] == ':' {
-			return i
+			return i + 1
 		}
 	}
 
@@ -95,6 +118,7 @@ func nextValue(data []rune, offset int) ([]rune, CybufType, int) {
 		offset++
 	}
 	if offset == len(data) {
+		log.Println("offset == len(data)")
 		return nil, CybufType_Nil, offset
 	}
 
@@ -114,19 +138,14 @@ func nextValue(data []rune, offset int) ([]rune, CybufType, int) {
 	}
 
 	if IsBoundChar(data[offset]) {
+		log.Println("IsBoundChar")
 		value, offset = findRightBound(data, offset)
+		log.Println(value, valueType, offset)
 		return value, valueType, offset
 	} else {
-		for offset < len(data) {
-			if unicode.IsSpace(data[offset]) {
-				break
-			}
+		for offset < len(data) && !unicode.IsSpace(data[offset]) {
+			offset++
 		}
-
-		if offset == len(data) {
-			return value, valueType, offset
-		}
-
 		value = data[start:offset]
 		if _, err := strconv.ParseFloat(string(value), 64); err == nil {
 			valueType = CybufType_Decimal
@@ -151,15 +170,18 @@ func findRightBound(data []rune, offset int) ([]rune, int) {
 		start          = offset
 	)
 
+	offset++
 	for offset < len(data) {
 		switch data[offset] {
-		case leftBound:
-			leftBoundCount++
+		// Check case data[offset]==rightBound first, quotes won't work if reverse
 		case rightBound:
 			leftBoundCount--
+		case leftBound:
+			leftBoundCount++
 		}
 
 		if leftBoundCount == 0 {
+			log.Println("data:", data[start:offset+1])
 			return data[start : offset+1], offset + 1
 		}
 
