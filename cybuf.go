@@ -35,7 +35,7 @@ func unmarshal(data []rune, v interface{}) error {
 		}
 
 		i = nextColon(data, i)
-		if i==-1 {
+		if i == -1 {
 			return &ParseError{
 				Stage: ParseStage_Colon,
 				Index: i,
@@ -43,8 +43,8 @@ func unmarshal(data []rune, v interface{}) error {
 			}
 		}
 
-		value,i = nextValue(data,i)
-		if value==nil {
+		value, i = nextValue(data, i)
+		if value == nil {
 			return &ParseError{
 				Stage: ParseStage_Value,
 				Index: i,
@@ -57,6 +57,41 @@ func unmarshal(data []rune, v interface{}) error {
 }
 
 func nextKey(data []rune, offset int) ([]rune, int) {
+	var (
+		start = offset
+	)
+
+	for offset < len(data) && unicode.IsSpace(data[offset]) {
+		offset++
+	}
+	if offset == len(data) {
+		return nil, offset
+	}
+
+	start = offset
+
+	for c := data[offset]; !unicode.IsSpace(c) && c != ':'; c = data[offset] {
+		offset++
+	}
+
+	if offset == len(data) {
+		return nil, offset
+	}
+
+	return data[start:offset], offset
+}
+
+func nextColon(data []rune, offset int) int {
+	for i := offset; i < len(data); i++ {
+		if data[i] == ':' {
+			return i
+		}
+	}
+
+	return -1
+}
+
+func nextValue(data []rune, offset int) ([]rune, CybufType, int) {
 	var (
 		start = offset
 
@@ -79,20 +114,6 @@ func nextKey(data []rune, offset int) ([]rune, int) {
 	}
 
 	return nil, offset
-}
-
-func nextColon(data []rune, offset int) int {
-	for i := offset; i < len(data); i++ {
-		if data[i] == ':' {
-			return i
-		}
-	}
-
-	return -1
-}
-
-func nextValue(data []rune, offset int) ([]rune, int) {
-
 }
 
 func IsValieKeyName(name []rune) bool {
