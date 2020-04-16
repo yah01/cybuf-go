@@ -1,7 +1,6 @@
 package cybuf
 
 import (
-	"log"
 	"reflect"
 	"strconv"
 	"strings"
@@ -31,7 +30,7 @@ func unmarshal(data []rune, v interface{}) error {
 	rv := v.(*map[string]interface{})
 	for i := 0; i < len(data); {
 
-		log.Println("nextKey:")
+		//log.Println("nextKey:")
 		key, i = nextKey(data, i)
 		if key == nil {
 			return &ParseError{
@@ -41,9 +40,9 @@ func unmarshal(data []rune, v interface{}) error {
 			}
 		}
 		// todo check key
-		log.Println("key:", string(key))
+		//log.Println("key:", string(key))
 
-		log.Println("nextColon:")
+		//log.Println("nextColon:")
 		i = nextColon(data, i)
 		if i == -1 {
 			return &ParseError{
@@ -52,9 +51,9 @@ func unmarshal(data []rune, v interface{}) error {
 				Char:  data[i],
 			}
 		}
-		log.Println("colon:", string(data[i-1]))
+		//log.Println("colon:", string(data[i-1]))
 
-		log.Println("nextValue:")
+		//log.Println("nextValue:")
 		value, valueType, i = nextValue(data, i)
 		if value == nil {
 			return &ParseError{
@@ -64,7 +63,7 @@ func unmarshal(data []rune, v interface{}) error {
 			}
 		}
 
-		log.Println(key, value, valueType)
+		//log.Println(key, value, valueType)
 		switch valueType {
 		case CybufType_Nil:
 			(*rv)[string(key)] = nil
@@ -75,7 +74,7 @@ func unmarshal(data []rune, v interface{}) error {
 		case CybufType_String:
 			(*rv)[string(key)] = strings.Trim(string(value), `'"`)
 		}
-		log.Println(*rv)
+		//log.Println(*rv)
 	}
 
 	return nil
@@ -118,7 +117,7 @@ func nextValue(data []rune, offset int) ([]rune, CybufType, int) {
 		offset++
 	}
 	if offset == len(data) {
-		log.Println("offset == len(data)")
+		//log.Println("offset == len(data)")
 		return nil, CybufType_Nil, offset
 	}
 
@@ -138,9 +137,9 @@ func nextValue(data []rune, offset int) ([]rune, CybufType, int) {
 	}
 
 	if IsBoundChar(data[offset]) {
-		log.Println("IsBoundChar")
+		//log.Println("IsBoundChar")
 		value, offset = findRightBound(data, offset)
-		log.Println(value, valueType, offset)
+		//log.Println(value, valueType, offset)
 		return value, valueType, offset
 	} else {
 		for offset < len(data) && !unicode.IsSpace(data[offset]) {
@@ -181,7 +180,7 @@ func findRightBound(data []rune, offset int) ([]rune, int) {
 		}
 
 		if leftBoundCount == 0 {
-			log.Println("data:", data[start:offset+1])
+			//log.Println("data:", data[start:offset+1])
 			return data[start : offset+1], offset + 1
 		}
 
