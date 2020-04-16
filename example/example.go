@@ -13,7 +13,11 @@ Weight : 100.2
 Fuck : {
 Name : "you"
 Age : 99
-}`)
+}
+Emails: [
+"kagaminehuan@live.com"
+"cenyang@bytedance.com"
+]`)
 
 	testMap := map[string]interface{}{}
 
