@@ -121,7 +121,7 @@ func unmarshalArray(data []rune, v *[]interface{}) error {
 
 	debugLog.Println("unmarshal array data:", string(data))
 
-	for i := 0; i < len(data); i++ {
+	for i := 0; i < len(data); {
 		value, valueType, i = nextValue(data, i)
 
 		if value == nil {
