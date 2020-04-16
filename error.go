@@ -35,5 +35,5 @@ type ParseError struct {
 }
 
 func (e *ParseError) Error() string {
-	return fmt.Sprintf("cybuf: Can't parse from %d(%v) when finding %v", e.Index, e.Char, e.Stage)
+	return fmt.Sprintf("cybuf: Can't parse from %d(%s) when finding %s", e.Index, string(e.Char), e.Stage)
 }
