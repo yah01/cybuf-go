@@ -1,8 +1,10 @@
 package cybuf
 
 type CybufType int
+
 const (
-	CybufType_Number CybufType = iota
+	CybufType_nil CybufType = iota
+	CybufType_Number
 	CybufType_Decimal
 	CybufType_String
 	CybufType_Array
