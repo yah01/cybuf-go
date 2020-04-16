@@ -2,6 +2,7 @@ package cybuf
 
 import (
 	"reflect"
+	"strconv"
 	"unicode"
 )
 
@@ -20,8 +21,9 @@ func Unmarshal(data []byte, v interface{}) error {
 
 func unmarshal(data []rune, v interface{}) error {
 	var (
-		key   []rune
-		value []rune
+		key       []rune
+		value     []rune
+		valueType CybufType
 	)
 
 	for i := 0; i < len(data); {
@@ -43,7 +45,7 @@ func unmarshal(data []rune, v interface{}) error {
 			}
 		}
 
-		value, i = nextValue(data, i)
+		value, valueType, i = nextValue(data, i)
 		if value == nil {
 			return &ParseError{
 				Stage: ParseStage_Value,
@@ -57,23 +59,19 @@ func unmarshal(data []rune, v interface{}) error {
 }
 
 func nextKey(data []rune, offset int) ([]rune, int) {
-	var (
-		start = offset
-	)
-
+	// Find first non-space character
 	for offset < len(data) && unicode.IsSpace(data[offset]) {
 		offset++
 	}
 	if offset == len(data) {
 		return nil, offset
 	}
+	start := offset
 
-	start = offset
-
+	// Find key until meet the first space character of colon
 	for c := data[offset]; !unicode.IsSpace(c) && c != ':'; c = data[offset] {
 		offset++
 	}
-
 	if offset == len(data) {
 		return nil, offset
 	}
@@ -92,25 +90,80 @@ func nextColon(data []rune, offset int) int {
 }
 
 func nextValue(data []rune, offset int) ([]rune, CybufType, int) {
+	// Find first non-space character
+	for offset < len(data) && unicode.IsSpace(data[offset]) {
+		offset++
+	}
+	if offset == len(data) {
+		return nil, CybufType_Nil, offset
+	}
+
+	start := offset
+
 	var (
-		start = offset
-
-		sawFirstChar bool
+		value     []rune
+		valueType CybufType
 	)
-	for i, c := range data {
+	switch data[offset] {
+	case '{':
+		valueType = CybufType_Object
+	case '[':
+		valueType = CybufType_Array
+	case '"', '\'':
+		valueType = CybufType_String
+	}
 
-		if sawFirstChar {
-			if unicode.IsSpace(c) || c == ':' {
-				return data[start:i], i
-			}
-		} else {
-			if unicode.IsSpace(c) {
-				continue
-			} else {
-				start = i
-				sawFirstChar = true
+	if IsBoundChar(data[offset]) {
+		value, offset = findRightBound(data, offset)
+		return value, valueType, offset
+	} else {
+		for offset < len(data) {
+			if unicode.IsSpace(data[offset]) {
+				break
 			}
 		}
+
+		if offset == len(data) {
+			return value, valueType, offset
+		}
+
+		value = data[start:offset]
+		if _, err := strconv.ParseFloat(string(value), 64); err == nil {
+			valueType = CybufType_Decimal
+		} else if _, err = strconv.ParseInt(string(value), 10, 64); err == nil {
+			valueType = CybufType_Number
+		}
+
+		if valueType == CybufType_Nil && string(value) != "nil" {
+			return nil, valueType, offset
+		}
+
+		return value, valueType, offset
+	}
+}
+
+// data[offset] must be non-space character
+func findRightBound(data []rune, offset int) ([]rune, int) {
+	var (
+		leftBound      = data[offset]
+		rightBound     = BoundMap(leftBound)
+		leftBoundCount = 1
+		start          = offset
+	)
+
+	for offset < len(data) {
+		switch data[offset] {
+		case leftBound:
+			leftBoundCount++
+		case rightBound:
+			leftBoundCount--
+		}
+
+		if leftBoundCount == 0 {
+			return data[start : offset+1], offset + 1
+		}
+
+		offset++
 	}
 
 	return nil, offset
