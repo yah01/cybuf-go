@@ -1,6 +1,9 @@
 package cybuf
 
-import "unicode"
+import (
+	"reflect"
+	"unicode"
+)
 
 type CybufType int
 
@@ -12,6 +15,30 @@ const (
 	CybufType_Array
 	CybufType_Object
 )
+
+func GetValueType(v interface{}) CybufType {
+	switch v.(type) {
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
+		return CybufType_Number
+	case float32, float64:
+		return CybufType_Decimal
+	case []byte, []rune, string:
+		return CybufType_String
+	}
+
+	realValue := reflect.ValueOf(v)
+	if realValue.IsNil() {
+		return CybufType_Nil
+	}
+	switch realValue.Kind() {
+	case reflect.Array, reflect.Slice:
+		return CybufType_Array
+	case reflect.Map, reflect.Struct:
+		return CybufType_Object
+	}
+
+	return CybufType_Nil
+}
 
 func IsAllDigit(data []rune) bool {
 	for _, c := range data {
