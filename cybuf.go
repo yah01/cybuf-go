@@ -55,9 +55,9 @@ func marshal(v interface{}, tabCount int) ([]byte, error) {
 		switch valueType {
 		case CybufType_Nil:
 			valueBytes = []byte("nil")
-		case CybufType_Number:
+		case CybufType_Integer:
 			valueBytes = strconv.AppendInt(valueBytes, realValue.Int(), 10)
-		case CybufType_Decimal:
+		case CybufType_Float:
 			valueBytes = strconv.AppendFloat(valueBytes, realValue.Float(), 'f', -1, 64)
 			//case CybufType_String:
 			//	switch realValue.Kind() {
@@ -128,9 +128,9 @@ func unmarshal(data []byte, v interface{}) error {
 		switch valueType {
 		case CybufType_Nil:
 			(*rv)[keyStr] = nil
-		case CybufType_Number:
+		case CybufType_Integer:
 			(*rv)[keyStr], _ = strconv.ParseInt(valueStr, 10, 64)
-		case CybufType_Decimal:
+		case CybufType_Float:
 			(*rv)[keyStr], _ = strconv.ParseFloat(valueStr, 64)
 		case CybufType_String:
 			(*rv)[keyStr] = strings.Trim(valueStr, string(value[0]))
@@ -155,7 +155,7 @@ func unmarshal(data []byte, v interface{}) error {
 			(*rv)[keyStr] = object
 		}
 
-		debugLog.Println("parsed:", keyStr, valueStr)
+		//debugLog.Println("parsed:", keyStr, valueStr)
 	}
 
 	return nil
@@ -170,11 +170,11 @@ func unmarshalArray(data []byte, v *[]interface{}) error {
 	)
 
 	data = []byte(strings.TrimSpace(string(data)))
-	debugLog.Println(string(data))
+	//debugLog.Println(string(data))
 	if data[0] == '[' && data[len(data)-1] == ']' {
 		data = data[1 : len(data)-1]
 	}
-	debugLog.Println(string(data))
+	//debugLog.Println(string(data))
 
 	// debugLog.Println("unmarshal array data:", string(data))
 
@@ -196,10 +196,10 @@ func unmarshalArray(data []byte, v *[]interface{}) error {
 		switch valueType {
 		case CybufType_Nil:
 			realValue = nil
-		case CybufType_Number:
+		case CybufType_Integer:
 			intValue, _ := strconv.ParseInt(valueStr, 10, 64)
 			realValue = intValue
-		case CybufType_Decimal:
+		case CybufType_Float:
 			floatValue, _ := strconv.ParseFloat(valueStr, 64)
 			realValue = floatValue
 		case CybufType_String:
@@ -213,7 +213,6 @@ func unmarshalArray(data []byte, v *[]interface{}) error {
 				return err
 			}
 			realValue = array
-
 		case CybufType_Object:
 			var object = make(map[string]interface{})
 			err := unmarshal(value, &object)
@@ -299,9 +298,9 @@ func nextValue(data []byte, offset int) ([]byte, CybufType, int) {
 		}
 		value = data[start:offset]
 		if _, err := strconv.ParseFloat(string(value), 64); err == nil {
-			valueType = CybufType_Decimal
+			valueType = CybufType_Float
 		} else if _, err = strconv.ParseInt(string(value), 10, 64); err == nil {
-			valueType = CybufType_Number
+			valueType = CybufType_Integer
 		}
 
 		if valueType == CybufType_Nil && string(value) != "nil" {

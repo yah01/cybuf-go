@@ -9,8 +9,9 @@ type CybufType int
 
 const (
 	CybufType_Nil CybufType = iota
-	CybufType_Number
-	CybufType_Decimal
+	CybufType_Integer
+	CybufType_Float
+	CybufType_Bool
 	CybufType_String
 	CybufType_Array
 	CybufType_Object
@@ -19,9 +20,9 @@ const (
 func GetValueType(v interface{}) CybufType {
 	switch v.(type) {
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
-		return CybufType_Number
+		return CybufType_Integer
 	case float32, float64:
-		return CybufType_Decimal
+		return CybufType_Float
 	case []byte, []rune, string:
 		return CybufType_String
 	}
