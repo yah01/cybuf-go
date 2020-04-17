@@ -11,17 +11,17 @@ func main() {
 	Name: "cybuf"
 	Age: 1
 	Weight: 100.2
-	Fuck: {
-	Name: "you"
-	Age: 99
+	School: {
+	  Name: "Wuhan University"
+	  Age: 120
 	}
-	Emails: [{
-		Prefix: "kagaminehuan"
-		Name: "live.com"
+	Friends: [{
+		Name: "Zerone"
+		Phone: 01010101
 	}
 	{
-		Prefix: "cenyang"
-		Name: "bytedance.com"
+		Name: "Acm"
+		Phone: 2333
 	}]
 }
 `)
