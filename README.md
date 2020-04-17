@@ -8,7 +8,7 @@ CyBuf looks like JSON, there are three differences:
 - Attributes of CyBuf have no double quotes
 
 A standard CyBuf format data:
-```json
+```yaml
 {
 	Name: "cybuf"
 	Age: 1
