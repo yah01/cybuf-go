@@ -22,7 +22,7 @@ func IsAllDigit(data []rune) bool {
 	return true
 }
 
-func IsBoundChar(c rune) bool {
+func IsBoundChar(c byte) bool {
 	switch c {
 	case '{', '}', '[', ']', '"', '\'':
 		return true
@@ -31,7 +31,7 @@ func IsBoundChar(c rune) bool {
 }
 
 // c must be a bound character
-func BoundMap(c rune) rune {
+func BoundMap(c byte) byte {
 	switch c {
 	case '{':
 		return '}'

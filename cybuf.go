@@ -1,8 +1,8 @@
 package cybuf
 
 import (
+	"io/ioutil"
 	"log"
-	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -10,13 +10,13 @@ import (
 )
 
 var (
-	debugLog *log.Logger
+	// debugLog *log.Logger
 	errorLog *log.Logger
 )
 
 func init() {
-	debugLog = log.New(os.Stdout, "Debug ", log.LstdFlags|log.Lshortfile)
-	errorLog = log.New(os.Stdout, "Error ", log.LstdFlags|log.Lshortfile)
+	// debugLog = log.New(ioutil.Discard, "Debug ", log.LstdFlags|log.Lshortfile)
+	errorLog = log.New(ioutil.Discard, "Error ", log.LstdFlags|log.Lshortfile)
 }
 
 func Unmarshal(data []byte, v interface{}) error {
@@ -27,26 +27,28 @@ func Unmarshal(data []byte, v interface{}) error {
 		}
 	}
 
-	realData := []rune(string(data))
-	return unmarshal(realData, v)
+	//realData := []rune(string(data))
+	return unmarshal(data, v)
 }
 
-func unmarshal(data []rune, v interface{}) error {
+func unmarshal(data []byte, v interface{}) error {
 	var (
-		key       []rune
+		key       []byte
 		keyStr    string
-		value     []rune
+		value     []byte
 		valueStr  string
 		valueType CybufType
 		err       error
+
+		//waitSub = sync.WaitGroup{}
 	)
 
-	data = []rune(strings.TrimSpace(string(data)))
+	data = []byte(strings.TrimSpace(string(data)))
 	for data[0] == '{' && data[len(data)-1] == '}' {
 		data = data[1 : len(data)-1]
 	}
 
-	debugLog.Println("unmarshal data:", string(data))
+	// debugLog.Println("unmarshal data:", string(data))
 
 	rv := v.(*map[string]interface{})
 	for i := 0; i < len(data); {
@@ -70,7 +72,7 @@ func unmarshal(data []rune, v interface{}) error {
 		}
 		valueStr = string(value)
 
-		debugLog.Println("value: "+string(value)+", valueType:", valueType)
+		//// debugLog.Println("value: "+string(value)+", valueType:", valueType)
 		switch valueType {
 		case CybufType_Nil:
 			(*rv)[keyStr] = nil
@@ -82,6 +84,7 @@ func unmarshal(data []rune, v interface{}) error {
 			(*rv)[keyStr] = strings.Trim(valueStr, string(value[0]))
 		case CybufType_Array:
 			array := make([]interface{}, 0)
+			//waitSub.Add(1)
 			err := unmarshalArray(value, &array)
 			if err != nil {
 				errorLog.Println(err)
@@ -96,30 +99,30 @@ func unmarshal(data []rune, v interface{}) error {
 				errorLog.Println(err)
 				return err
 			}
-			debugLog.Println(object)
+			// debugLog.Println(object)
 			(*rv)[keyStr] = object
 		}
 
-		debugLog.Println("parsed:", keyStr, valueStr)
+		// debugLog.Println("parsed:", keyStr, valueStr)
 	}
 
 	return nil
 }
 
-func unmarshalArray(data []rune, v *[]interface{}) error {
+func unmarshalArray(data []byte, v *[]interface{}) error {
 	var (
-		value     []rune
+		value     []byte
 		valueStr  string
 		valueType CybufType
 		realValue interface{}
 	)
 
-	data = []rune(strings.TrimSpace(string(data)))
+	data = []byte(strings.TrimSpace(string(data)))
 	if data[0] == '[' && data[len(data)-1] == ']' {
 		data = data[1 : len(data)-1]
 	}
 
-	debugLog.Println("unmarshal array data:", string(data))
+	// debugLog.Println("unmarshal array data:", string(data))
 
 	for i := 0; i < len(data); {
 		value, valueType, i = nextValue(data, i)
@@ -128,7 +131,7 @@ func unmarshalArray(data []rune, v *[]interface{}) error {
 			return &ParseError{
 				Stage: ParseStage_Value,
 				Index: i,
-				Char:  data[i],
+				Char:  rune(data[i]),
 			}
 		}
 		valueStr = string(value)
@@ -161,20 +164,20 @@ func unmarshalArray(data []rune, v *[]interface{}) error {
 				errorLog.Println(err)
 				return err
 			}
-			debugLog.Println(object)
+			// debugLog.Println(object)
 			realValue = object
 		}
 
-		debugLog.Println("append:", realValue)
+		// debugLog.Println("append:", realValue)
 		*v = append(*v, realValue)
 	}
 
 	return nil
 }
 
-func nextKey(data []rune, offset int) ([]rune, int) {
+func nextKey(data []byte, offset int) ([]byte, int) {
 	// Find first non-space character
-	for offset < len(data) && unicode.IsSpace(data[offset]) {
+	for offset < len(data) && unicode.IsSpace(rune(data[offset])) {
 		offset++
 	}
 	if offset == len(data) {
@@ -183,7 +186,7 @@ func nextKey(data []rune, offset int) ([]rune, int) {
 	start := offset
 
 	// Find key until meet the first space character of colon
-	for c := data[offset]; offset < len(data) && !unicode.IsSpace(c) && c != ':'; c = data[offset] {
+	for c := data[offset]; offset < len(data) && !unicode.IsSpace(rune(c)) && c != ':'; c = data[offset] {
 		offset++
 	}
 	if offset == len(data) {
@@ -193,7 +196,7 @@ func nextKey(data []rune, offset int) ([]rune, int) {
 	return data[start:offset], offset
 }
 
-func nextColon(data []rune, offset int) int {
+func nextColon(data []byte, offset int) int {
 	for i := offset; i < len(data); i++ {
 		if data[i] == ':' {
 			return i + 1
@@ -203,9 +206,9 @@ func nextColon(data []rune, offset int) int {
 	return -1
 }
 
-func nextValue(data []rune, offset int) ([]rune, CybufType, int) {
+func nextValue(data []byte, offset int) ([]byte, CybufType, int) {
 	// Find first non-space character
-	for offset < len(data) && unicode.IsSpace(data[offset]) {
+	for offset < len(data) && unicode.IsSpace(rune(data[offset])) {
 		offset++
 	}
 	if offset == len(data) {
@@ -215,7 +218,7 @@ func nextValue(data []rune, offset int) ([]rune, CybufType, int) {
 	start := offset
 
 	var (
-		value     []rune
+		value     []byte
 		valueType CybufType
 	)
 	switch data[offset] {
@@ -228,13 +231,13 @@ func nextValue(data []rune, offset int) ([]rune, CybufType, int) {
 	}
 
 	if IsBoundChar(data[offset]) {
-		debugLog.Println("IsBoundChar, offset =", offset, "data = ", string(data[offset:]))
+		// debugLog.Println("IsBoundChar, offset =", offset, "data = ", string(data[offset:]))
 		value, offset = findRightBound(data, offset)
-		debugLog.Println("new offset =", offset)
+		// debugLog.Println("new offset =", offset)
 		return value, valueType, offset
 	} else {
 
-		for offset < len(data) && !unicode.IsSpace(data[offset]) {
+		for offset < len(data) && !unicode.IsSpace(rune(data[offset])) {
 			offset++
 		}
 		value = data[start:offset]
@@ -252,10 +255,10 @@ func nextValue(data []rune, offset int) ([]rune, CybufType, int) {
 	}
 }
 
-func nextKeyValuePair(data []rune, offset int) ([]rune, []rune, CybufType, int, error) {
+func nextKeyValuePair(data []byte, offset int) ([]byte, []byte, CybufType, int, error) {
 	var (
-		key       []rune
-		value     []rune
+		key       []byte
+		value     []byte
 		valueType CybufType
 	)
 
@@ -267,17 +270,17 @@ func nextKeyValuePair(data []rune, offset int) ([]rune, []rune, CybufType, int, 
 		return nil, nil, valueType, offset, &ParseError{
 			Stage: ParseStage_Key,
 			Index: offset,
-			Char:  data[offset],
+			Char:  rune(data[offset]),
 		}
 	}
-	debugLog.Println("key:", string(key))
+	// debugLog.Println("key:", string(key))
 
 	offset = nextColon(data, offset)
 	if data[offset-1] != ':' {
 		return nil, nil, valueType, offset, &ParseError{
 			Stage: ParseStage_Colon,
 			Index: offset,
-			Char:  data[offset],
+			Char:  rune(data[offset]),
 		}
 	}
 
@@ -289,13 +292,13 @@ func nextKeyValuePair(data []rune, offset int) ([]rune, []rune, CybufType, int, 
 			//Char:  data[offset],
 		}
 	}
-	debugLog.Println("value:", string(value))
+	// debugLog.Println("value:", string(value))
 
 	return key, value, valueType, offset, nil
 }
 
 // data[offset] must be non-space character
-func findRightBound(data []rune, offset int) ([]rune, int) {
+func findRightBound(data []byte, offset int) ([]byte, int) {
 	var (
 		leftBound      = data[offset]
 		rightBound     = BoundMap(leftBound)
@@ -320,22 +323,22 @@ func findRightBound(data []rune, offset int) ([]rune, int) {
 		offset++
 	}
 
-	debugLog.Println("right bound not found!")
+	// debugLog.Println("right bound not found!")
 	return nil, offset
 }
 
-func IsValidKeyName(name []rune) bool {
+func IsValidKeyName(name []byte) bool {
 
-	name = []rune(strings.TrimSpace(string(name)))
+	name = []byte(strings.TrimSpace(string(name)))
 	if len(name) == 0 {
 		return false
 	}
 
-	if len(name) > 0 && !unicode.IsLetter(name[0]) && !(name[0] != '_') {
+	if len(name) > 0 && !unicode.IsLetter(rune(name[0])) && !(name[0] != '_') {
 		return false
 	}
 	for _, c := range name {
-		if !unicode.IsLetter(c) && unicode.IsDigit(c) && c != '_' {
+		if !unicode.IsLetter(rune(c)) && unicode.IsDigit(rune(c)) && c != '_' {
 			return false
 		}
 	}

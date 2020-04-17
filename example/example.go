@@ -8,20 +8,20 @@ import (
 func main() {
 	cybufBytes := []byte(`
 {
-	Name : "cybuf"
-	Age : 1
-	Weight : 100.2
-	Fuck : {
-	Name : "you"
-	Age : 99
+	Name: "cybuf"
+	Age: 1
+	Weight: 100.2
+	Fuck: {
+	Name: "you"
+	Age: 99
 	}
 	Emails: [{
-		Prefix : "kagaminehuan"
-		Name : "live.com"
+		Prefix: "kagaminehuan"
+		Name: "live.com"
 	}
 	{
-		Prefix : "cenyang"
-		Name : "bytedance.com"
+		Prefix: "cenyang"
+		Name: "bytedance.com"
 	}]
 }
 `)
