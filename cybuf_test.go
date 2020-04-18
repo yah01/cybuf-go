@@ -6,23 +6,25 @@ import (
 )
 
 var (
-	bytes = []byte(`
+	cybufBytes = []byte(`
 {
 	Name: "cybuf"
 	Age: 1
 	Weight: 100.2
-	Fuck: {
-	Name: "you"
-	Age: 99
+	School: {
+		Name: "Wuhan University"
+		Age: 120
 	}
-	Emails: [{
-		Prefix: "kagaminehuan"
-		Name: "live.com"
-	}
-	{
-		Prefix: "cenyang"
-		Name: "bytedance.com"
-	}]
+	Friends: [
+		{
+			Name: "Zerone"
+			Phone: 1010101
+		}
+		{
+			Name: "Acm"
+			Phone: 2333
+		}
+	]
 }
 `)
 	jsonBytes = []byte(`
@@ -30,31 +32,40 @@ var (
 	"Name": "cybuf",
 	"Age": 1,
 	"Weight": 100.2,
-	"Fuck": {
-		"Name": "you",
-		"Age": 99
+	"School": {
+		"Name": "Wuhan University",
+		"Age": 120
 	},
-	"Emails": [
+	"Friends": [
 		{
-			"Prefix": "kagaminehuan",
-			"Name": "live.com"
+			"Name": "Zerone",
+			"Phone": 1010101
 		},
 		{
-			"Prefix": "cenyang",
-			"Name": "bytedance.com"
+			"Name": "Acm",
+			"Phone": 2333
 		}
 	]
 }
 `)
 )
 
+func TestCyBufUnmarshal(t *testing.T) {
+	unmarshalMap := map[string]interface{}{}
 
-func BenchmarkUnmarshal(b *testing.B) {
+	err := Unmarshal(cybufBytes, &unmarshalMap)
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(unmarshalMap)
+}
+
+func BenchmarkCyBufUnmarshal(b *testing.B) {
 	b.ResetTimer()
 
 	testMap := make(map[string]interface{})
 	for i := 0; i < b.N; i++ {
-		Unmarshal(bytes,&testMap)
+		Unmarshal(cybufBytes, &testMap)
 	}
 }
 
@@ -63,6 +74,6 @@ func BenchmarkJsonUnmarshal(b *testing.B) {
 
 	testMap := make(map[string]interface{})
 	for i := 0; i < b.N; i++ {
-		json.Unmarshal(jsonBytes,&testMap)
+		json.Unmarshal(jsonBytes, &testMap)
 	}
 }
