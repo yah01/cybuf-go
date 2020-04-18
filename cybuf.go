@@ -1,15 +1,13 @@
 package cybuf
 
 import (
-	"reflect"
-	"strconv"
-	"strings"
+	"bytes"
 	"unicode"
 )
 
 var (
-	//debugLog *log.Logger
-	// errorLog *log.Logger
+//debugLog *log.Logger
+// errorLog *log.Logger
 )
 
 func init() {
@@ -17,12 +15,9 @@ func init() {
 	// errorLog = log.New(ioutil.Discard, "Error ", log.LstdFlags|log.Lshortfile)
 }
 
-
-
-
 func IsValidKeyName(name []byte) bool {
 
-	name = []byte(strings.TrimSpace(string(name)))
+	name = bytes.TrimSpace(name)
 	if len(name) == 0 {
 		return false
 	}

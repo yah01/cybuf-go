@@ -1,6 +1,7 @@
 package cybuf
 
 import (
+	"bytes"
 	"reflect"
 	"strconv"
 	"strings"
@@ -28,7 +29,7 @@ func unmarshal(data []byte, v interface{}) error {
 		err       error
 	)
 
-	data = []byte(strings.TrimSpace(string(data)))
+	data = bytes.TrimSpace(data)
 	for data[0] == '{' && data[len(data)-1] == '}' {
 		data = data[1 : len(data)-1]
 	}
@@ -102,7 +103,7 @@ func unmarshalArray(data []byte, v *[]interface{}) error {
 		realValue interface{}
 	)
 
-	data = []byte(strings.TrimSpace(string(data)))
+	data = bytes.TrimSpace(data)
 	//debugLog.Println(string(data))
 	data = data[1 : len(data)-1]
 
@@ -141,8 +142,7 @@ func unmarshalArray(data []byte, v *[]interface{}) error {
 		case CybufType_Float:
 			realValue, _ = strconv.ParseFloat(valueStr, 64)
 		case CybufType_String:
-			stringValue := strings.Trim(valueStr, string(value[0]))
-			realValue = stringValue
+			realValue = strings.Trim(valueStr, string(value[0]))
 		case CybufType_Array:
 			array := make([]interface{}, 0)
 			err := unmarshalArray(value, &array)
