@@ -60,6 +60,31 @@ func TestCyBufUnmarshal(t *testing.T) {
 	t.Log(unmarshalMap)
 }
 
+type School struct {
+	Name string
+	Age  int
+}
+
+func TestCyBufMarshal(t *testing.T) {
+	marshalMap := map[string]interface{}{
+		"Name": "yah01",
+		"Age":  21,
+		"Live": true,
+		"School": map[string]interface{}{
+			"Name": "Wuhan University",
+			"Age":  120,
+		},
+	}
+
+
+	bytes, err := Marshal(marshalMap)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log("\n"+string(bytes))
+}
+
 func BenchmarkCyBufUnmarshal(b *testing.B) {
 	b.ResetTimer()
 

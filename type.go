@@ -2,7 +2,6 @@ package cybuf
 
 import (
 	"reflect"
-	"unicode"
 )
 
 type CybufType int
@@ -31,23 +30,24 @@ func GetInterfaceValueType(v interface{}) CybufType {
 	}
 
 	realValue := reflect.ValueOf(v)
+	if realValue.Kind() == reflect.Struct {
+		return CybufType_Object
+	}
+
 	if realValue.IsNil() {
 		return CybufType_Nil
 	}
 	switch realValue.Kind() {
 	case reflect.Array, reflect.Slice:
 		return CybufType_Array
-	case reflect.Map, reflect.Struct:
+	case reflect.Map:
 		return CybufType_Object
 	}
 
-	return CybufType_Nil
+	return CybufType_Invalid
 }
 
-func GetStringValueType(v string) CybufType {
-	if IsBoolType(v) {
-		return CybufType_Bool
-	}
+func GetBytesValueType(v []byte) CybufType {
 	if IsStringValue(v) {
 		return CybufType_String
 	}
@@ -60,6 +60,9 @@ func GetStringValueType(v string) CybufType {
 	if IsNilType(v) {
 		return CybufType_Nil
 	}
+	if IsBoolType(string(v)) {
+		return CybufType_Bool
+	}
 	if IsIntegerValue(v) {
 		return CybufType_Integer
 	}
@@ -69,15 +72,44 @@ func GetStringValueType(v string) CybufType {
 	return CybufType_Invalid
 }
 
-func IsNilType(v string) bool {
-	return v == "nil"
+func GetBytesValueComplexType(v []byte) CybufType {
+	if IsStringValue(v) {
+		return CybufType_String
+	}
+	if IsArrayValue(v) {
+		return CybufType_Array
+	}
+	if IsObjectValue(v) {
+		return CybufType_Object
+	}
+	return CybufType_Invalid
+}
+
+func GetBytesValueSimpleType(v []byte) CybufType {
+	if IsNilType(v) {
+		return CybufType_Nil
+	}
+	if IsBoolType(string(v)) {
+		return CybufType_Bool
+	}
+	if IsIntegerValue(v) {
+		return CybufType_Integer
+	}
+	if IsFloatValue(v) {
+		return CybufType_Float
+	}
+	return CybufType_Invalid
+}
+
+func IsNilType(v []byte) bool {
+	return v[0] == 'n' && v[1] == 'i' && v[2] == 'l'
 }
 
 func IsBoolType(v string) bool {
 	return v == "true" || v == "True" || v == "false" || v == "False"
 }
 
-func IsIntegerValue(v string) bool {
+func IsIntegerValue(v []byte) bool {
 	for i := 0; i < len(v); i++ {
 		if v[i] < '0' || v[i] > '9' {
 			return false
@@ -86,7 +118,7 @@ func IsIntegerValue(v string) bool {
 	return true
 }
 
-func IsFloatValue(v string) bool {
+func IsFloatValue(v []byte) bool {
 	sawDot := false
 	for i := 0; i < len(v); i++ {
 		if v[i] == '.' {
@@ -101,26 +133,17 @@ func IsFloatValue(v string) bool {
 	return true
 }
 
-func IsStringValue(v string) bool {
+func IsStringValue(v []byte) bool {
 	return v[0] == v[len(v)-1] && (
 		v[0] == '\'' || v[0] == '"')
 }
 
-func IsArrayValue(v string) bool {
+func IsArrayValue(v []byte) bool {
 	return v[0] == v[len(v)-1] && v[0] == '['
 }
 
-func IsObjectValue(v string) bool {
+func IsObjectValue(v []byte) bool {
 	return v[0] == v[len(v)-1] && v[0] == '{'
-}
-
-func IsAllDigit(data []rune) bool {
-	for _, c := range data {
-		if !unicode.IsDigit(c) {
-			return false
-		}
-	}
-	return true
 }
 
 func IsBoundChar(c byte) bool {
