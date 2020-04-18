@@ -20,7 +20,7 @@ A standard CyBuf format data:
 	Friends: [
 		{
 			Name: "Zerone"
-			Phone: 01010101
+			Phone: 20200412
 		}
 		{
 			Name: "ACM"
