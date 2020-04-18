@@ -75,6 +75,16 @@ func TestCyBufMarshal(t *testing.T) {
 	t.Log("\n" + string(marshalBytes))
 }
 
+func TestCyBufMarshalIndent(t *testing.T) {
+
+	marshalBytes, err = MarshalIndent(marshalMap)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log("\n" + string(marshalBytes))
+}
+
 func TestCyBufUnmarshal(t *testing.T) {
 	unmarshalMap := map[string]interface{}{}
 
@@ -89,7 +99,23 @@ func BenchmarkCyBufMarshal(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		marshalBytes, _ = Marshal(marshalMap)
+		marshalBytes, err = Marshal(marshalMap)
+		if err != nil {
+			b.Fatal(err)
+			return
+		}
+	}
+}
+
+func BenchmarkCyBufMarshalIndent(b *testing.B) {
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		marshalBytes, err = MarshalIndent(marshalMap)
+		if err != nil {
+			b.Fatal(err)
+			return
+		}
 	}
 }
 
@@ -97,7 +123,11 @@ func BenchmarkJsonMarshal(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		marshalBytes, _ = json.Marshal(marshalMap)
+		marshalBytes, err = json.Marshal(marshalMap)
+		if err != nil {
+			b.Fatal(err)
+			return
+		}
 	}
 }
 
@@ -105,7 +135,11 @@ func BenchmarkJsonMarshalIndent(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		marshalBytes, _ = json.MarshalIndent(marshalMap, "", "\t")
+		marshalBytes, err = json.MarshalIndent(marshalMap, "", "\t")
+		if err != nil {
+			b.Fatal(err)
+			return
+		}
 	}
 }
 
@@ -114,7 +148,11 @@ func BenchmarkCyBufUnmarshal(b *testing.B) {
 
 	testMap := make(map[string]interface{})
 	for i := 0; i < b.N; i++ {
-		Unmarshal(cybufBytes, &testMap)
+		err = Unmarshal(cybufBytes, &testMap)
+		if err != nil {
+			b.Fatal(err)
+			return
+		}
 	}
 }
 
@@ -123,6 +161,10 @@ func BenchmarkJsonUnmarshal(b *testing.B) {
 
 	testMap := make(map[string]interface{})
 	for i := 0; i < b.N; i++ {
-		json.Unmarshal(jsonBytes, &testMap)
+		err = json.Unmarshal(jsonBytes, &testMap)
+		if err != nil {
+			b.Fatal(err)
+			return
+		}
 	}
 }
