@@ -65,14 +65,20 @@ var (
 	err          error
 )
 
-func TestCyBufMarshal(t *testing.T) {
+func init() {
+	MarshalSep = ' '
+}
 
+func TestCyBufMarshal(t *testing.T) {
 	marshalBytes, err = Marshal(marshalMap)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	t.Log("\n" + string(marshalBytes))
+	t.Log("\n" + string(marshalBytes) + "\n")
+	t.Log("CyBuf Marshal length:", len(marshalBytes), "\n")
+	marshalBytes, _ = json.Marshal(marshalMap)
+	t.Log("JSON Marshal length:", len(marshalBytes), "\n")
 }
 
 func TestCyBufMarshalIndent(t *testing.T) {
@@ -82,7 +88,10 @@ func TestCyBufMarshalIndent(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	t.Log("\n" + string(marshalBytes))
+	t.Log("\n" + string(marshalBytes) + "\n")
+	t.Log("CyBuf MarshalIndent length:", len(marshalBytes), "\n")
+	marshalBytes, _ = json.MarshalIndent(marshalMap, "", "\t")
+	t.Log("JSON MarshalIndent length:", len(marshalBytes), "\n")
 }
 
 func TestCyBufUnmarshal(t *testing.T) {
