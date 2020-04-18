@@ -74,15 +74,15 @@ func TestCyBufMarshal(t *testing.T) {
 			"Name": "Wuhan University",
 			"Age":  120,
 		},
+		"Wallet": []float64{1.0, 10.0, 100.0},
 	}
-
 
 	bytes, err := Marshal(marshalMap)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	t.Log("\n"+string(bytes))
+	t.Log("\n" + string(bytes))
 }
 
 func BenchmarkCyBufUnmarshal(b *testing.B) {
