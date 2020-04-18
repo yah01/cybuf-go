@@ -27,6 +27,7 @@ var (
 	]
 }
 `)
+
 	jsonBytes = []byte(`
 {
 	"Name": "cybuf",
@@ -48,25 +49,8 @@ var (
 	]
 }
 `)
-)
 
-func TestCyBufUnmarshal(t *testing.T) {
-	unmarshalMap := map[string]interface{}{}
-
-	err := Unmarshal(cybufBytes, &unmarshalMap)
-	if err != nil {
-		t.Error(err)
-	}
-	t.Log(unmarshalMap)
-}
-
-type School struct {
-	Name string
-	Age  int
-}
-
-func TestCyBufMarshal(t *testing.T) {
-	marshalMap := map[string]interface{}{
+	marshalMap = map[string]interface{}{
 		"Name": "yah01",
 		"Age":  21,
 		"Live": true,
@@ -77,12 +61,52 @@ func TestCyBufMarshal(t *testing.T) {
 		"Wallet": []float64{1.0, 10.0, 100.0},
 	}
 
-	bytes, err := Marshal(marshalMap)
+	marshalBytes []byte
+	err          error
+)
+
+func TestCyBufMarshal(t *testing.T) {
+
+	marshalBytes, err = Marshal(marshalMap)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	t.Log("\n" + string(bytes))
+	t.Log("\n" + string(marshalBytes))
+}
+
+func TestCyBufUnmarshal(t *testing.T) {
+	unmarshalMap := map[string]interface{}{}
+
+	err = Unmarshal(cybufBytes, &unmarshalMap)
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(unmarshalMap)
+}
+
+func BenchmarkCyBufMarshal(b *testing.B) {
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		marshalBytes, _ = Marshal(marshalMap)
+	}
+}
+
+func BenchmarkJsonMarshal(b *testing.B) {
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		marshalBytes, _ = json.Marshal(marshalMap)
+	}
+}
+
+func BenchmarkJsonMarshalIndent(b *testing.B) {
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		marshalBytes, _ = json.MarshalIndent(marshalMap, "", "\t")
+	}
 }
 
 func BenchmarkCyBufUnmarshal(b *testing.B) {
