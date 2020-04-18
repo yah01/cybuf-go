@@ -147,9 +147,6 @@ func marshalIndent(v interface{}, tabCount int) ([]byte, error) {
 	rv := v.(map[string]interface{})
 
 	tabs := bytes.Repeat([]byte{'\t'}, tabCount)
-	if tabCount == 0 {
-		tabs = []byte{'\t'}
-	}
 
 	for key, value := range rv {
 		cybufBytes = append(cybufBytes, tabs...)
@@ -210,9 +207,6 @@ func marshalArrayIndent(v interface{}, tabCount int) ([]byte, error) {
 	rv := reflect.ValueOf(v)
 
 	tabs := bytes.Repeat([]byte{'\t'}, tabCount)
-	if tabCount == 0 {
-		tabs = []byte{'\t'}
-	}
 
 	for i := 0; i < rv.Len(); i++ {
 		cybufBytes = append(cybufBytes, tabs...)
