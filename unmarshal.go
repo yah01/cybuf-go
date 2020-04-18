@@ -19,7 +19,16 @@ func Unmarshal(data []byte, v interface{}) error {
 		}
 	}
 
-	return unmarshal(data, v)
+	if rv.Elem().Kind() == reflect.Map {
+		return unmarshal(data, v)
+	} else {
+		objMap := new(map[string]interface{})
+		err := unmarshal(data, objMap)
+		if err != nil {
+			return err
+		}
+		return mapToStruct(objMap, v)
+	}
 }
 
 func unmarshal(data []byte, v interface{}) error {
@@ -28,7 +37,7 @@ func unmarshal(data []byte, v interface{}) error {
 		keyStr    string
 		value     []byte
 		valueStr  string
-		valueType CybufType
+		valueType CyBufType
 		err       error
 	)
 
@@ -63,15 +72,15 @@ func unmarshal(data []byte, v interface{}) error {
 
 		// debugLog.Println("value: "+string(value)+", valueType:", valueType)
 		switch valueType {
-		case CybufType_Nil:
+		case CyBufType_Nil:
 			(*rv)[keyStr] = nil
-		case CybufType_Integer:
+		case CyBufType_Integer:
 			(*rv)[keyStr], _ = strconv.ParseInt(valueStr, 10, 64)
-		case CybufType_Float:
+		case CyBufType_Float:
 			(*rv)[keyStr], _ = strconv.ParseFloat(valueStr, 64)
-		case CybufType_String:
+		case CyBufType_String:
 			(*rv)[keyStr] = string(value[1 : len(value)-1])
-		case CybufType_Array:
+		case CyBufType_Array:
 			array := make([]interface{}, 0)
 			//waitSub.Add(1)
 			err := unmarshalArray(value, &array)
@@ -81,7 +90,7 @@ func unmarshal(data []byte, v interface{}) error {
 			}
 			(*rv)[keyStr] = array
 
-		case CybufType_Object:
+		case CyBufType_Object:
 			var object = make(map[string]interface{})
 			err := unmarshal(value, &object)
 			if err != nil {
@@ -102,7 +111,7 @@ func unmarshalArray(data []byte, v *[]interface{}) error {
 	var (
 		value     []byte
 		valueStr  string
-		valueType CybufType
+		valueType CyBufType
 		realValue interface{}
 	)
 
@@ -130,23 +139,23 @@ func unmarshalArray(data []byte, v *[]interface{}) error {
 		valueStr = string(value)
 
 		switch valueType {
-		case CybufType_Nil:
+		case CyBufType_Nil:
 			realValue = nil
-		case CybufType_Bool:
+		case CyBufType_Bool:
 			switch valueStr {
 			case "true", "True":
 				realValue = true
 			case "false", "False":
 				realValue = false
 			}
-		case CybufType_Integer:
+		case CyBufType_Integer:
 			realValue, _ = strconv.ParseInt(valueStr, 10, 64)
 			//realValue = intValue
-		case CybufType_Float:
+		case CyBufType_Float:
 			realValue, _ = strconv.ParseFloat(valueStr, 64)
-		case CybufType_String:
+		case CyBufType_String:
 			realValue = string(value[1 : len(value)-1])
-		case CybufType_Array:
+		case CyBufType_Array:
 			array := make([]interface{}, 0)
 			err := unmarshalArray(value, &array)
 			if err != nil {
@@ -154,7 +163,7 @@ func unmarshalArray(data []byte, v *[]interface{}) error {
 				return err
 			}
 			realValue = array
-		case CybufType_Object:
+		case CyBufType_Object:
 			var object = make(map[string]interface{})
 			err := unmarshal(value, &object)
 			if err != nil {
@@ -202,28 +211,28 @@ func nextColon(data []byte, offset int) int {
 	return -1
 }
 
-func nextValue(data []byte, offset int) ([]byte, CybufType, int) {
+func nextValue(data []byte, offset int) ([]byte, CyBufType, int) {
 	// Find first non-space character
 	for offset < len(data) && unicode.IsSpace(rune(data[offset])) {
 		offset++
 	}
 	if offset == len(data) {
-		return nil, CybufType_Nil, offset
+		return nil, CyBufType_Nil, offset
 	}
 
 	start := offset
 
 	var (
 		value     []byte
-		valueType CybufType
+		valueType CyBufType
 	)
 	switch data[offset] {
 	case '{':
-		valueType = CybufType_Object
+		valueType = CyBufType_Object
 	case '[':
-		valueType = CybufType_Array
+		valueType = CyBufType_Array
 	case '"', '\'':
-		valueType = CybufType_String
+		valueType = CyBufType_String
 	}
 
 	if IsBoundChar(data[offset]) {
@@ -239,7 +248,7 @@ func nextValue(data []byte, offset int) ([]byte, CybufType, int) {
 		value = data[start:offset]
 
 		valueType = GetBytesValueSimpleType(value)
-		if valueType == CybufType_Invalid {
+		if valueType == CyBufType_Invalid {
 			return nil, valueType, offset
 		}
 
@@ -247,11 +256,11 @@ func nextValue(data []byte, offset int) ([]byte, CybufType, int) {
 	}
 }
 
-func nextKeyValuePair(data []byte, offset int) ([]byte, []byte, CybufType, int, error) {
+func nextKeyValuePair(data []byte, offset int) ([]byte, []byte, CyBufType, int, error) {
 	var (
 		key       []byte
 		value     []byte
-		valueType CybufType
+		valueType CyBufType
 	)
 
 	key, offset = nextKey(data, offset)

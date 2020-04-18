@@ -14,7 +14,7 @@ func marshal(v interface{}) ([]byte, error) {
 	var (
 		cybufBytes = []byte{'{'}
 		realValue  reflect.Value
-		valueType  CybufType
+		valueType  CyBufType
 
 		valueBytes = make([]byte, 0)
 	)
@@ -29,28 +29,28 @@ func marshal(v interface{}) ([]byte, error) {
 		realValue = reflect.ValueOf(value)
 		valueType = GetInterfaceValueType(value)
 		switch valueType {
-		case CybufType_Nil:
+		case CyBufType_Nil:
 			valueBytes = []byte("nil")
-		case CybufType_Bool:
+		case CyBufType_Bool:
 			valueBytes = strconv.AppendBool(valueBytes, realValue.Bool())
-		case CybufType_Integer:
+		case CyBufType_Integer:
 			valueBytes = strconv.AppendInt(valueBytes, realValue.Int(), 10)
-		case CybufType_Float:
+		case CyBufType_Float:
 			valueBytes = strconv.AppendFloat(valueBytes, realValue.Float(), 'f', -1, 64)
-		case CybufType_String:
+		case CyBufType_String:
 			switch realValue.Kind() {
 			case reflect.String:
 				valueBytes = strconv.AppendQuote(valueBytes, realValue.String())
 			case reflect.Slice:
 				valueBytes = append(valueBytes, realValue.Bytes()...)
 			}
-		case CybufType_Array:
+		case CyBufType_Array:
 			arrayBytes, err := marshalArray(value)
 			if err != nil {
 				return nil, err
 			}
 			valueBytes = append(valueBytes, arrayBytes...)
-		case CybufType_Object:
+		case CyBufType_Object:
 			objectBytes, err := marshal(value)
 			if err != nil {
 				return nil, err
@@ -58,11 +58,15 @@ func marshal(v interface{}) ([]byte, error) {
 			valueBytes = append(valueBytes, objectBytes...)
 		}
 		cybufBytes = append(cybufBytes, valueBytes...)
-		if valueType != CybufType_String && valueType != CybufType_Array && valueType != CybufType_Object {
-			cybufBytes = append(cybufBytes, '\n')
+		if valueType != CyBufType_String && valueType != CyBufType_Array && valueType != CyBufType_Object {
+			cybufBytes = append(cybufBytes, MarshalSep)
 		}
 	}
-	cybufBytes = append(cybufBytes, '}')
+	if cybufBytes[len(cybufBytes)-1] == MarshalSep {
+		cybufBytes[len(cybufBytes)-1] = '}'
+	} else {
+		cybufBytes = append(cybufBytes, '}')
+	}
 
 	return cybufBytes, nil
 }
@@ -72,7 +76,7 @@ func marshalArray(v interface{}) ([]byte, error) {
 		cybufBytes = []byte{'['}
 		value      interface{}
 		realValue  reflect.Value
-		valueType  CybufType
+		valueType  CyBufType
 		valueBytes = make([]byte, 0)
 	)
 
@@ -85,28 +89,28 @@ func marshalArray(v interface{}) ([]byte, error) {
 		valueBytes = valueBytes[:0]
 
 		switch valueType {
-		case CybufType_Nil:
+		case CyBufType_Nil:
 			valueBytes = []byte("nil")
-		case CybufType_Bool:
+		case CyBufType_Bool:
 			valueBytes = strconv.AppendBool(valueBytes, realValue.Bool())
-		case CybufType_Integer:
+		case CyBufType_Integer:
 			valueBytes = strconv.AppendInt(valueBytes, realValue.Int(), 10)
-		case CybufType_Float:
+		case CyBufType_Float:
 			valueBytes = strconv.AppendFloat(valueBytes, realValue.Float(), 'f', -1, 64)
-		case CybufType_String:
+		case CyBufType_String:
 			switch realValue.Kind() {
 			case reflect.String:
 				valueBytes = strconv.AppendQuote(valueBytes, realValue.String())
 			case reflect.Slice:
 				valueBytes = append(valueBytes, realValue.Bytes()...)
 			}
-		case CybufType_Array:
+		case CyBufType_Array:
 			arrayBytes, err := marshalArray(value)
 			if err != nil {
 				return nil, err
 			}
 			valueBytes = append(valueBytes, arrayBytes...)
-		case CybufType_Object:
+		case CyBufType_Object:
 			objectBytes, err := marshal(value)
 			if err != nil {
 				return nil, err
@@ -114,11 +118,15 @@ func marshalArray(v interface{}) ([]byte, error) {
 			valueBytes = append(valueBytes, objectBytes...)
 		}
 		cybufBytes = append(cybufBytes, valueBytes...)
-		if valueType != CybufType_String && valueType != CybufType_Array && valueType != CybufType_Object {
-			cybufBytes = append(cybufBytes, '\n')
+		if valueType != CyBufType_String && valueType != CyBufType_Array && valueType != CyBufType_Object {
+			cybufBytes = append(cybufBytes, MarshalSep)
 		}
 	}
-	cybufBytes = append(cybufBytes, ']')
+	if cybufBytes[len(cybufBytes)-1] == MarshalSep {
+		cybufBytes[len(cybufBytes)-1] = ']'
+	} else {
+		cybufBytes = append(cybufBytes, ']')
+	}
 
 	return cybufBytes, nil
 }
@@ -131,7 +139,7 @@ func marshalIndent(v interface{}, tabCount int) ([]byte, error) {
 	var (
 		cybufBytes = []byte{'{', '\n'}
 		realValue  reflect.Value
-		valueType  CybufType
+		valueType  CyBufType
 
 		valueBytes = make([]byte, 0)
 	)
@@ -152,28 +160,28 @@ func marshalIndent(v interface{}, tabCount int) ([]byte, error) {
 		realValue = reflect.ValueOf(value)
 		valueType = GetInterfaceValueType(value)
 		switch valueType {
-		case CybufType_Nil:
+		case CyBufType_Nil:
 			valueBytes = []byte("nil")
-		case CybufType_Bool:
+		case CyBufType_Bool:
 			valueBytes = strconv.AppendBool(valueBytes, realValue.Bool())
-		case CybufType_Integer:
+		case CyBufType_Integer:
 			valueBytes = strconv.AppendInt(valueBytes, realValue.Int(), 10)
-		case CybufType_Float:
+		case CyBufType_Float:
 			valueBytes = strconv.AppendFloat(valueBytes, realValue.Float(), 'f', -1, 64)
-		case CybufType_String:
+		case CyBufType_String:
 			switch realValue.Kind() {
 			case reflect.String:
 				valueBytes = strconv.AppendQuote(valueBytes, realValue.String())
 			case reflect.Slice:
 				valueBytes = append(valueBytes, realValue.Bytes()...)
 			}
-		case CybufType_Array:
+		case CyBufType_Array:
 			arrayBytes, err := marshalArrayIndent(value, tabCount+1)
 			if err != nil {
 				return nil, err
 			}
 			valueBytes = append(valueBytes, arrayBytes...)
-		case CybufType_Object:
+		case CyBufType_Object:
 			objectBytes, err := marshalIndent(value, tabCount+1)
 			if err != nil {
 				return nil, err
@@ -195,7 +203,7 @@ func marshalArrayIndent(v interface{}, tabCount int) ([]byte, error) {
 		cybufBytes = []byte{'[', '\n'}
 		value      interface{}
 		realValue  reflect.Value
-		valueType  CybufType
+		valueType  CyBufType
 		valueBytes = make([]byte, 0)
 	)
 
@@ -215,28 +223,28 @@ func marshalArrayIndent(v interface{}, tabCount int) ([]byte, error) {
 		valueBytes = valueBytes[:0]
 
 		switch valueType {
-		case CybufType_Nil:
+		case CyBufType_Nil:
 			valueBytes = []byte("nil")
-		case CybufType_Bool:
+		case CyBufType_Bool:
 			valueBytes = strconv.AppendBool(valueBytes, realValue.Bool())
-		case CybufType_Integer:
+		case CyBufType_Integer:
 			valueBytes = strconv.AppendInt(valueBytes, realValue.Int(), 10)
-		case CybufType_Float:
+		case CyBufType_Float:
 			valueBytes = strconv.AppendFloat(valueBytes, realValue.Float(), 'f', -1, 64)
-		case CybufType_String:
+		case CyBufType_String:
 			switch realValue.Kind() {
 			case reflect.String:
 				valueBytes = strconv.AppendQuote(valueBytes, realValue.String())
 			case reflect.Slice:
 				valueBytes = append(valueBytes, realValue.Bytes()...)
 			}
-		case CybufType_Array:
+		case CyBufType_Array:
 			arrayBytes, err := marshalArrayIndent(value, tabCount+1)
 			if err != nil {
 				return nil, err
 			}
 			valueBytes = append(valueBytes, arrayBytes...)
-		case CybufType_Object:
+		case CyBufType_Object:
 			objectBytes, err := marshalIndent(value, tabCount+1)
 			if err != nil {
 				return nil, err

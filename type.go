@@ -4,101 +4,101 @@ import (
 	"reflect"
 )
 
-type CybufType int
+type CyBufType int
 
 const (
-	CybufType_Invalid CybufType = iota
-	CybufType_Nil
-	CybufType_Bool
-	CybufType_Integer
-	CybufType_Float
-	CybufType_String
-	CybufType_Array
-	CybufType_Object
+	CyBufType_Invalid CyBufType = iota
+	CyBufType_Nil
+	CyBufType_Bool
+	CyBufType_Integer
+	CyBufType_Float
+	CyBufType_String
+	CyBufType_Array
+	CyBufType_Object
 )
 
-func GetInterfaceValueType(v interface{}) CybufType {
+func GetInterfaceValueType(v interface{}) CyBufType {
 	switch v.(type) {
 	case bool:
-		return CybufType_Bool
+		return CyBufType_Bool
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
-		return CybufType_Integer
+		return CyBufType_Integer
 	case float32, float64:
-		return CybufType_Float
+		return CyBufType_Float
 	case []byte, []rune, string:
-		return CybufType_String
+		return CyBufType_String
 	}
 
 	realValue := reflect.ValueOf(v)
 	if realValue.Kind() == reflect.Struct {
-		return CybufType_Object
+		return CyBufType_Object
 	}
 
 	if realValue.IsNil() {
-		return CybufType_Nil
+		return CyBufType_Nil
 	}
 	switch realValue.Kind() {
 	case reflect.Array, reflect.Slice:
-		return CybufType_Array
+		return CyBufType_Array
 	case reflect.Map:
-		return CybufType_Object
+		return CyBufType_Object
 	}
 
-	return CybufType_Invalid
+	return CyBufType_Invalid
 }
 
-func GetBytesValueType(v []byte) CybufType {
+func GetBytesValueType(v []byte) CyBufType {
 	if IsStringValue(v) {
-		return CybufType_String
+		return CyBufType_String
 	}
 	if IsArrayValue(v) {
-		return CybufType_Array
+		return CyBufType_Array
 	}
 	if IsObjectValue(v) {
-		return CybufType_Object
+		return CyBufType_Object
 	}
 	if IsNilType(v) {
-		return CybufType_Nil
+		return CyBufType_Nil
 	}
 	if IsBoolType(string(v)) {
-		return CybufType_Bool
+		return CyBufType_Bool
 	}
 	if IsIntegerValue(v) {
-		return CybufType_Integer
+		return CyBufType_Integer
 	}
 	if IsFloatValue(v) {
-		return CybufType_Float
+		return CyBufType_Float
 	}
-	return CybufType_Invalid
+	return CyBufType_Invalid
 }
 
-func GetBytesValueComplexType(v []byte) CybufType {
+func GetBytesValueComplexType(v []byte) CyBufType {
 	if IsStringValue(v) {
-		return CybufType_String
+		return CyBufType_String
 	}
 	if IsArrayValue(v) {
-		return CybufType_Array
+		return CyBufType_Array
 	}
 	if IsObjectValue(v) {
-		return CybufType_Object
+		return CyBufType_Object
 	}
-	return CybufType_Invalid
+	return CyBufType_Invalid
 }
 
-func GetBytesValueSimpleType(v []byte) CybufType {
+func GetBytesValueSimpleType(v []byte) CyBufType {
 	if IsNilType(v) {
-		return CybufType_Nil
+		return CyBufType_Nil
 	}
 	if IsBoolType(string(v)) {
-		return CybufType_Bool
+		return CyBufType_Bool
 	}
 	if IsIntegerValue(v) {
-		return CybufType_Integer
+		return CyBufType_Integer
 	}
 	if IsFloatValue(v) {
-		return CybufType_Float
+		return CyBufType_Float
 	}
-	return CybufType_Invalid
+	return CyBufType_Invalid
 }
 
 func IsNilType(v []byte) bool {
