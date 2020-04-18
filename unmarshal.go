@@ -4,9 +4,12 @@ import (
 	"bytes"
 	"reflect"
 	"strconv"
-	"strings"
 	"unicode"
 )
+
+type Unmarshaler interface {
+	UnmarshalCyBuf(data []byte, v interface{}) error
+}
 
 func Unmarshal(data []byte, v interface{}) error {
 	rv := reflect.ValueOf(v)
@@ -49,13 +52,13 @@ func unmarshal(data []byte, v interface{}) error {
 			break
 		}
 		keyStr = string(key)
-		if !IsValidKeyName(key) {
-			return &ParseError{
-				Stage: ParseStage_Key,
-				Index: i,
-				//Char:  data[i],
-			}
-		}
+		//if !IsValidKeyName(key) {
+		//	return &ParseError{
+		//		Stage: ParseStage_Key,
+		//		Index: i,
+		//		//Char:  data[i],
+		//	}
+		//}
 		valueStr = string(value)
 
 		// debugLog.Println("value: "+string(value)+", valueType:", valueType)
@@ -67,7 +70,7 @@ func unmarshal(data []byte, v interface{}) error {
 		case CybufType_Float:
 			(*rv)[keyStr], _ = strconv.ParseFloat(valueStr, 64)
 		case CybufType_String:
-			(*rv)[keyStr] = strings.Trim(valueStr, string(value[0]))
+			(*rv)[keyStr] = string(value[1 : len(value)-1])
 		case CybufType_Array:
 			array := make([]interface{}, 0)
 			//waitSub.Add(1)
@@ -115,7 +118,7 @@ func unmarshalArray(data []byte, v *[]interface{}) error {
 		value, valueType, i = nextValue(data, i)
 
 		if value == nil {
-			if i == len(data) {
+			if i >= len(data) {
 				break
 			}
 			return &ParseError{
@@ -142,7 +145,7 @@ func unmarshalArray(data []byte, v *[]interface{}) error {
 		case CybufType_Float:
 			realValue, _ = strconv.ParseFloat(valueStr, 64)
 		case CybufType_String:
-			realValue = strings.Trim(valueStr, string(value[0]))
+			realValue = string(value[1 : len(value)-1])
 		case CybufType_Array:
 			array := make([]interface{}, 0)
 			err := unmarshalArray(value, &array)
@@ -196,7 +199,6 @@ func nextColon(data []byte, offset int) int {
 			return i + 1
 		}
 	}
-
 	return -1
 }
 
@@ -236,8 +238,7 @@ func nextValue(data []byte, offset int) ([]byte, CybufType, int) {
 		}
 		value = data[start:offset]
 
-		valueStr := string(value)
-		valueType = GetStringValueType(valueStr)
+		valueType = GetBytesValueSimpleType(value)
 		if valueType == CybufType_Invalid {
 			return nil, valueType, offset
 		}
