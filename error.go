@@ -11,13 +11,13 @@ type InvalidUnmarshalError struct {
 
 func (e *InvalidUnmarshalError) Error() string {
 	if e.Type == nil {
-		return "cybuf: Unmarshal(nil)"
+		return "cybuf: UnmarshalCyBuf(nil)"
 	}
 
 	if e.Type.Kind() != reflect.Ptr {
-		return "cybuf: Unmarshal(non-pointer " + e.Type.String() + ")"
+		return "cybuf: UnmarshalCyBuf(non-pointer " + e.Type.String() + ")"
 	}
-	return "cybuf: Unmarshal(nil " + e.Type.String() + ")"
+	return "cybuf: UnmarshalCyBuf(nil " + e.Type.String() + ")"
 }
 
 type ParseStage string

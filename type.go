@@ -47,6 +47,10 @@ func GetInterfaceValueType(v interface{}) CyBufType {
 	return CyBufType_Invalid
 }
 
+func GetReflectValueType(v reflect.Value) CyBufType {
+	return GetInterfaceValueType(v.Interface())
+}
+
 func GetBytesValueType(v []byte) CyBufType {
 	if IsStringValue(v) {
 		return CyBufType_String

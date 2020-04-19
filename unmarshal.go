@@ -8,7 +8,7 @@ import (
 )
 
 type Unmarshaler interface {
-	Unmarshal(data []byte, v interface{}) error
+	UnmarshalCyBuf(data []byte) error
 }
 
 func Unmarshal(data []byte, v interface{}) error {

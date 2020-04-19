@@ -5,6 +5,20 @@ import (
 	"testing"
 )
 
+type People struct {
+	Name    string
+	Age     int
+	Weight  float64
+	Live    bool
+	Friends []People
+	School  School
+}
+
+type School struct {
+	Name string
+	Age  int
+}
+
 var (
 	cybufBytes = []byte(`
 {
@@ -61,6 +75,27 @@ var (
 		"Wallet": []float64{1.0, 10.0, 100.0},
 	}
 
+	people = People{
+		Name:   "yah01",
+		Age:    21,
+		Weight: 100.2,
+		Live:   true,
+		Friends: []People{
+			{
+				Name:    "wmx",
+				Age:     100,
+				Weight:  200.5,
+				Live:    false,
+				Friends: nil,
+				School:  School{},
+			},
+		},
+		School: School{
+			Name: "Wuhan University",
+			Age:  120,
+		},
+	}
+
 	marshalBytes []byte
 	err          error
 )
@@ -81,6 +116,18 @@ func TestCyBufMarshal(t *testing.T) {
 	t.Log("JSON Marshal length:", len(marshalBytes), "\n")
 }
 
+func TestCyBufMarshalStruct(t *testing.T) {
+	marshalBytes, err = Marshal(people)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log("\n" + string(marshalBytes) + "\n")
+	t.Log("CyBuf Marshal length:", len(marshalBytes), "\n")
+	marshalBytes, _ = json.Marshal(people)
+	t.Log("JSON Marshal length:", len(marshalBytes), "\n")
+}
+
 func TestCyBufMarshalIndent(t *testing.T) {
 
 	marshalBytes, err = MarshalIndent(marshalMap)
@@ -92,6 +139,18 @@ func TestCyBufMarshalIndent(t *testing.T) {
 	t.Log("CyBuf MarshalIndent length:", len(marshalBytes), "\n")
 	marshalBytes, _ = json.MarshalIndent(marshalMap, "", "\t")
 	t.Log("JSON MarshalIndent length:", len(marshalBytes), "\n")
+}
+
+func TestCyBufMarshalStructIndent(t *testing.T) {
+	marshalBytes, err = MarshalIndent(people)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log("\n" + string(marshalBytes) + "\n")
+	t.Log("CyBuf Marshal length:", len(marshalBytes), "\n")
+	marshalBytes, _ = json.MarshalIndent(people,"","\t")
+	t.Log("JSON Marshal length:", len(marshalBytes), "\n")
 }
 
 func TestCyBufUnmarshal(t *testing.T) {

@@ -19,7 +19,6 @@ func init() {
 
 func mapToStruct(objMap *map[string]interface{}, v interface{}) error {
 	rv := reflect.ValueOf(v).Elem()
-
 	for i := 0; i < rv.NumField(); i++ {
 
 	}
