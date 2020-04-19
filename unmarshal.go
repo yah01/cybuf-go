@@ -67,6 +67,13 @@ func unmarshal(data []byte, v interface{}) error {
 		switch valueType {
 		case CyBufType_Nil:
 			(*rv)[keyStr] = nil
+		case CyBufType_Bool:
+			switch valueStr {
+			case "true", "True":
+				(*rv)[keyStr] = true
+			case "false", "False":
+				(*rv)[keyStr] = false
+			}
 		case CyBufType_Integer:
 			(*rv)[keyStr], _ = strconv.ParseInt(valueStr, 10, 64)
 		case CyBufType_Float:
@@ -107,6 +114,7 @@ func unmarshalStruct(data []byte, v interface{}) error {
 		valueStr  string
 		valueType CyBufType
 		err       error
+		field     reflect.Value
 	)
 
 	//debugLog.Println("unmarshalStruct")
@@ -117,9 +125,6 @@ func unmarshalStruct(data []byte, v interface{}) error {
 		data = data[1 : len(data)-1]
 	}
 
-	if reflect.TypeOf(v).Kind() != reflect.Ptr {
-		panic("wrong type!")
-	}
 	rv := reflect.ValueOf(v).Elem()
 
 	for i := 0; i < len(data); {
@@ -136,11 +141,18 @@ func unmarshalStruct(data []byte, v interface{}) error {
 		keyStr = string(key)
 		valueStr = string(value)
 
-		field := rv.FieldByName(keyStr)
+		field = rv.FieldByName(keyStr)
 		// debugLog.Println("value: "+string(value)+", valueType:", valueType)
 		switch valueType {
 		case CyBufType_Nil:
 			field.Set(reflect.Zero(field.Type()))
+		case CyBufType_Bool:
+			switch valueStr {
+			case "true", "True":
+				field.SetBool(true)
+			case "false", "False":
+				field.SetBool(false)
+			}
 		case CyBufType_Integer:
 			intValue, _ := strconv.ParseInt(valueStr, 10, 64)
 			field.SetInt(intValue)
@@ -150,31 +162,16 @@ func unmarshalStruct(data []byte, v interface{}) error {
 		case CyBufType_String:
 			field.SetString(string(value[1 : len(value)-1]))
 		case CyBufType_Array:
-			array := reflect.New(field.Type()).Interface()
-			err := unmarshalArray(value, array)
+			err = unmarshalArray(value, field.Addr().Interface())
 			if err != nil {
 				// errorLog.Println(err)
 				return err
 			}
-			field.Set(reflect.ValueOf(array).Elem())
 
 		case CyBufType_Object:
-			if field.Kind() == reflect.Map {
-				object := new(map[string]interface{})
-				err := unmarshal(value, object)
-				if err != nil {
-					// errorLog.Println(err)
-					return err
-				}
-				field.Set(reflect.ValueOf(*object))
-			} else {
-				object := reflect.New(field.Type()).Interface()
-				err := unmarshalStruct(value, object)
-				if err != nil {
-					// errorLog.Println(err)
-					return err
-				}
-				field.Set(reflect.ValueOf(object).Elem())
+			err = unmarshalStruct(value, field.Addr().Interface())
+			if err != nil {
+				return err
 			}
 
 		}
@@ -191,6 +188,7 @@ func unmarshalArray(data []byte, v interface{}) error {
 		realValue   interface{}
 		sliceValue  = reflect.ValueOf(v).Elem()
 		elementType = reflect.TypeOf(v).Elem().Elem()
+		err         error
 	)
 
 	//debugLog.Println("unmarshalArray")
@@ -232,7 +230,7 @@ func unmarshalArray(data []byte, v interface{}) error {
 			realValue = string(value[1 : len(value)-1])
 		case CyBufType_Array:
 			array := reflect.New(elementType)
-			err := unmarshalArray(value, array.Interface())
+			err = unmarshalArray(value, array.Interface())
 			if err != nil {
 				// errorLog.Println(err)
 				return err
@@ -241,14 +239,14 @@ func unmarshalArray(data []byte, v interface{}) error {
 		case CyBufType_Object:
 			if elementType.Kind() == reflect.Struct {
 				object := reflect.New(elementType).Interface()
-				err := unmarshalStruct(value, object)
+				err = unmarshalStruct(value, object)
 				if err != nil {
 					return err
 				}
 				realValue = reflect.ValueOf(object).Elem().Interface()
 			} else {
 				object := make(map[string]interface{})
-				err := unmarshal(value, &object)
+				err = unmarshal(value, &object)
 				if err != nil {
 					// errorLog.Println(err)
 					return err
