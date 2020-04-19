@@ -75,6 +75,31 @@ var (
 		"Wallet": []float64{1.0, 10.0, 100.0},
 	}
 
+	peopleBytes = []byte(`
+{
+	Name: "yah01"
+	Age: 21
+	Weight: 100.2
+	Live: true
+	Friends: [
+			{
+					Name: "wmx"
+					Age: 100
+					Weight: 200.5
+					Live: false
+					Friends: nil
+					School: {
+							Name: ""
+							Age: 0
+					}
+			}
+	]
+	School: {
+			Name: "Wuhan University"
+			Age: 120
+	}
+}
+`)
 	people = People{
 		Name:   "yah01",
 		Age:    21,
@@ -149,18 +174,28 @@ func TestCyBufMarshalStructIndent(t *testing.T) {
 	}
 	t.Log("\n" + string(marshalBytes) + "\n")
 	t.Log("CyBuf Marshal length:", len(marshalBytes), "\n")
-	marshalBytes, _ = json.MarshalIndent(people,"","\t")
+	marshalBytes, _ = json.MarshalIndent(people, "", "\t")
 	t.Log("JSON Marshal length:", len(marshalBytes), "\n")
 }
 
 func TestCyBufUnmarshal(t *testing.T) {
 	unmarshalMap := map[string]interface{}{}
 
-	err = Unmarshal(cybufBytes, &unmarshalMap)
+	err = Unmarshal(peopleBytes, &unmarshalMap)
 	if err != nil {
 		t.Error(err)
 	}
 	t.Log(unmarshalMap)
+}
+
+func TestCyBufUnmarshalStruct(t *testing.T) {
+	unmarshalPeople := People{}
+
+	err = Unmarshal(peopleBytes, &unmarshalPeople)
+	if err != nil {
+		t.Error(err)
+	}
+	t.Logf("%+v",unmarshalPeople)
 }
 
 func BenchmarkCyBufMarshal(b *testing.B) {
