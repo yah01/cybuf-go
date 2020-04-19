@@ -1,5 +1,7 @@
 # CyBuf-go
 一个用于序列化&反序列化CyBuf格式数据的golang包。
+- [English](README.md)
+- [中文](README.zh_CN.md)
 
 ## 用法
 CyBuf和JSON类似，但它们两者之间主要有三个不同：

@@ -1,5 +1,7 @@
 # CyBuf-go
 a go package for marshal&unmarshal CyBuf format data
+- [English](README.md)
+- [中文](README.zh_CN.md)
 
 ## Usage
 CyBuf looks like JSON, there are three differences:
