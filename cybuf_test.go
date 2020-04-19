@@ -2,6 +2,8 @@ package cybuf
 
 import (
 	"encoding/json"
+	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -20,86 +22,6 @@ type School struct {
 }
 
 var (
-	cybufBytes = []byte(`
-{
-	Name: "cybuf"
-	Age: 1
-	Weight: 100.2
-	School: {
-		Name: "Wuhan University"
-		Age: 120
-	}
-	Friends: [
-		{
-			Name: "Zerone"
-			Phone: 1010101
-		}
-		{
-			Name: "Acm"
-			Phone: 2333
-		}
-	]
-}
-`)
-
-	jsonBytes = []byte(`
-{
-	"Name": "cybuf",
-	"Age": 1,
-	"Weight": 100.2,
-	"School": {
-		"Name": "Wuhan University",
-		"Age": 120
-	},
-	"Friends": [
-		{
-			"Name": "Zerone",
-			"Phone": 1010101
-		},
-		{
-			"Name": "Acm",
-			"Phone": 2333
-		}
-	]
-}
-`)
-
-	marshalMap = map[string]interface{}{
-		"Name": "yah01",
-		"Age":  21,
-		"Live": true,
-		"School": map[string]interface{}{
-			"Name": "Wuhan University",
-			"Age":  120,
-		},
-		"Wallet": []float64{1.0, 10.0, 100.0},
-	}
-
-	peopleBytes = []byte(`
-{
-	Name: "yah01"
-	Age: 21
-	Weight: 100.2
-	Live: true
-	Friends: [
-			{
-					Name: "wmx"
-					Age: 100
-					Weight: 200.5
-					Live: false
-					Friends: nil
-					School: {
-							Name: ""
-							Age: 0
-					}
-			}
-	]
-	School: {
-			Name: "Wuhan University"
-			Age: 120
-	}
-}
-`)
 	people = People{
 		Name:   "yah01",
 		Age:    21,
@@ -112,7 +34,10 @@ var (
 				Weight:  200.5,
 				Live:    false,
 				Friends: nil,
-				School:  School{},
+				School: School{
+					Name: "SHU",
+					Age:  114514,
+				},
 			},
 		},
 		School: School{
@@ -121,152 +46,200 @@ var (
 		},
 	}
 
-	marshalBytes []byte
-	err          error
+	peopleMap        map[string]interface{}
+	cybufBytes       []byte
+	cybufIndentBytes []byte
+	jsonBytes        []byte
+	jsonIndentBytes  []byte
+	err              error
 )
 
 func init() {
 	MarshalSep = ' '
+	if cybufBytes, err = Marshal(people); err != nil {
+		panic(err)
+	}
+	if cybufIndentBytes, err = MarshalIndent(people); err != nil {
+		panic(err)
+	}
+	if jsonBytes, err = json.Marshal(people); err != nil {
+		panic(err)
+	}
+	if jsonIndentBytes, err = json.MarshalIndent(people, "", "\t"); err != nil {
+		panic(err)
+	}
+	peopleMap = make(map[string]interface{})
+	err = Unmarshal(cybufBytes, &peopleMap)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(people, peopleMap, string(cybufBytes), string(cybufIndentBytes), string(jsonBytes), string(jsonIndentBytes))
 }
 
-func TestCyBufMarshal(t *testing.T) {
-	marshalBytes, err = Marshal(marshalMap)
+func TestCyBufMarshalMap(t *testing.T) {
+	_, err := Marshal(peopleMap)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	t.Log("\n" + string(marshalBytes) + "\n")
-	t.Log("CyBuf Marshal length:", len(marshalBytes), "\n")
-	marshalBytes, _ = json.Marshal(marshalMap)
-	t.Log("JSON Marshal length:", len(marshalBytes), "\n")
+	//if !bytes.Equal(_, cybufBytes) {
+	//	t.Error(string(_),string(cybufBytes))
+	//}
 }
 
 func TestCyBufMarshalStruct(t *testing.T) {
-	marshalBytes, err = Marshal(people)
+	_, err := Marshal(people)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	t.Log("\n" + string(marshalBytes) + "\n")
-	t.Log("CyBuf Marshal length:", len(marshalBytes), "\n")
-	marshalBytes, _ = json.Marshal(people)
-	t.Log("JSON Marshal length:", len(marshalBytes), "\n")
+	//if !bytes.Equal(_, cybufBytes) {
+	//	t.Error(_)
+	//}
 }
 
-func TestCyBufMarshalIndent(t *testing.T) {
-
-	marshalBytes, err = MarshalIndent(marshalMap)
+func TestCyBufMarshalIndentMap(t *testing.T) {
+	_, err := MarshalIndent(peopleMap)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	t.Log("\n" + string(marshalBytes) + "\n")
-	t.Log("CyBuf MarshalIndent length:", len(marshalBytes), "\n")
-	marshalBytes, _ = json.MarshalIndent(marshalMap, "", "\t")
-	t.Log("JSON MarshalIndent length:", len(marshalBytes), "\n")
+	//if !bytes.Equal(_, cybufIndentBytes) {
+	//	t.Error(_)
+	//}
 }
 
 func TestCyBufMarshalStructIndent(t *testing.T) {
-	marshalBytes, err = MarshalIndent(people)
+	_, err := Marshal(people)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	t.Log("\n" + string(marshalBytes) + "\n")
-	t.Log("CyBuf Marshal length:", len(marshalBytes), "\n")
-	marshalBytes, _ = json.MarshalIndent(people, "", "\t")
-	t.Log("JSON Marshal length:", len(marshalBytes), "\n")
+	//if !bytes.Equal(_, cybufIndentBytes) {
+	//	t.Error(_)
+	//}
 }
 
-func TestCyBufUnmarshal(t *testing.T) {
-	unmarshalMap := map[string]interface{}{}
+func TestCyBufUnmarshalMap(t *testing.T) {
+	res := map[string]interface{}{}
 
-	err = Unmarshal(peopleBytes, &unmarshalMap)
+	err = Unmarshal(cybufBytes, &res)
 	if err != nil {
 		t.Error(err)
 	}
-	t.Log(unmarshalMap)
+	if !reflect.DeepEqual(res, peopleMap) {
+		t.Error(res)
+	}
 }
 
 func TestCyBufUnmarshalStruct(t *testing.T) {
-	unmarshalPeople := People{}
+	res := People{}
 
-	err = Unmarshal(peopleBytes, &unmarshalPeople)
+	err = Unmarshal(cybufBytes, &res)
 	if err != nil {
 		t.Error(err)
 	}
-	t.Logf("%+v",unmarshalPeople)
+	if !reflect.DeepEqual(res, people) {
+		t.Error(res, people)
+	}
 }
 
-func BenchmarkCyBufMarshal(b *testing.B) {
+func BenchmarkCyBufMarshalMap(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		marshalBytes, err = Marshal(marshalMap)
+		res, err := Marshal(peopleMap)
 		if err != nil {
-			b.Fatal(err)
+			b.Error(res, err)
 			return
 		}
 	}
 }
 
-func BenchmarkCyBufMarshalIndent(b *testing.B) {
+func BenchmarkJsonMarshalMap(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		marshalBytes, err = MarshalIndent(marshalMap)
+		res, err := json.Marshal(peopleMap)
 		if err != nil {
-			b.Fatal(err)
+			b.Error(res, err)
 			return
 		}
 	}
 }
 
-func BenchmarkJsonMarshal(b *testing.B) {
+func BenchmarkCyBufMarshalIndentMap(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		marshalBytes, err = json.Marshal(marshalMap)
+		res, err := MarshalIndent(peopleMap)
 		if err != nil {
-			b.Fatal(err)
+			b.Error(res, err)
 			return
 		}
 	}
 }
 
-func BenchmarkJsonMarshalIndent(b *testing.B) {
+func BenchmarkJsonMarshalIndentMap(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		marshalBytes, err = json.MarshalIndent(marshalMap, "", "\t")
+		res, err := json.MarshalIndent(peopleMap, "", "\t")
 		if err != nil {
-			b.Fatal(err)
+			b.Error(res, err)
 			return
 		}
 	}
 }
 
-func BenchmarkCyBufUnmarshal(b *testing.B) {
-	b.ResetTimer()
+func BenchmarkCyBufUnmarshalMap(b *testing.B) {
+	res := make(map[string]interface{})
 
-	testMap := make(map[string]interface{})
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		err = Unmarshal(cybufBytes, &testMap)
+		err = Unmarshal(cybufBytes, &res)
 		if err != nil {
-			b.Fatal(err)
+			b.Error(err)
 			return
 		}
 	}
 }
 
-func BenchmarkJsonUnmarshal(b *testing.B) {
-	b.ResetTimer()
+func BenchmarkJsonUnmarshalMap(b *testing.B) {
+	res := make(map[string]interface{})
 
-	testMap := make(map[string]interface{})
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		err = json.Unmarshal(jsonBytes, &testMap)
+		err = json.Unmarshal(jsonBytes, &res)
 		if err != nil {
-			b.Fatal(err)
+			b.Error(err)
+			return
+		}
+	}
+}
+
+func BenchmarkCyBufUnmarshalStruct(b *testing.B) {
+
+	people := People{}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		err = Unmarshal(cybufBytes, &people)
+		if err != nil {
+			b.Error(err)
+			return
+		}
+	}
+}
+
+func BenchmarkJsonUnmarshalStruct(b *testing.B) {
+	people := People{}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		err = json.Unmarshal(jsonBytes, &people)
+		if err != nil {
+			b.Error(err)
 			return
 		}
 	}

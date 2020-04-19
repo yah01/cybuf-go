@@ -19,6 +19,8 @@ const (
 
 func GetInterfaceValueType(v interface{}) CyBufType {
 	switch v.(type) {
+	case nil:
+		return CyBufType_Nil
 	case bool:
 		return CyBufType_Bool
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
@@ -34,7 +36,7 @@ func GetInterfaceValueType(v interface{}) CyBufType {
 		return CyBufType_Object
 	}
 
-	if realValue.IsNil() {
+	if realValue.IsZero() || realValue.IsNil() {
 		return CyBufType_Nil
 	}
 	switch realValue.Kind() {
