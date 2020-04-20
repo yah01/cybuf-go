@@ -29,13 +29,36 @@ var (
 		Live:   true,
 		Friends: []People{
 			{
-				Name:    "wmx",
-				Age:     100,
-				Weight:  200.5,
-				Live:    false,
-				Friends: nil,
+				Name:   "wmx",
+				Age:    100,
+				Weight: 200.5,
+				Live:   false,
+				Friends: []People{
+					{
+						Name:    "bytedance",
+						Age:     8,
+						Weight:  114514.5,
+						Live:    true,
+						Friends: nil,
+						School: School{
+							Name: "BDU",
+							Age:  114514,
+						},
+					},
+				},
 				School: School{
 					Name: "SHU",
+					Age:  114514,
+				},
+			},
+			{
+				Name:    "bytedance",
+				Age:     8,
+				Weight:  114514.5,
+				Live:    true,
+				Friends: nil,
+				School: School{
+					Name: "BDU",
 					Age:  114514,
 				},
 			},

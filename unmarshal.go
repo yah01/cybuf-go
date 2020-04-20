@@ -205,7 +205,6 @@ func unmarshalArray(data []byte, v reflect.Value) error {
 		valueStr  string
 		valueType CyBufType
 		realValue interface{}
-		tmpSlice  []reflect.Value
 		typ       = v.Type().Elem()
 		err       error
 	)
@@ -277,11 +276,9 @@ func unmarshalArray(data []byte, v reflect.Value) error {
 		}
 
 		//if valueType != CyBufType_Array && valueType != CyBufType_Object {
-		tmpSlice = append(tmpSlice, reflect.ValueOf(realValue))
+		v.Set(reflect.Append(v, reflect.ValueOf(realValue)))
 		//}
 	}
-
-	v.Set(reflect.Append(v, tmpSlice...))
 
 	return nil
 }
