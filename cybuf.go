@@ -2,7 +2,6 @@ package cybuf
 
 import (
 	"bytes"
-	"reflect"
 	"unicode"
 )
 
@@ -15,15 +14,6 @@ var (
 func init() {
 	//debugLog = log.New(os.Stdout, "Debug ", log.LstdFlags|log.Lshortfile)
 	// errorLog = log.New(ioutil.Discard, "Error ", log.LstdFlags|log.Lshortfile)
-}
-
-func mapToStruct(objMap *map[string]interface{}, v interface{}) error {
-	rv := reflect.ValueOf(v).Elem()
-	for i := 0; i < rv.NumField(); i++ {
-
-	}
-
-	return nil
 }
 
 func IsValidKeyName(name []byte) bool {
