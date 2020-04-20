@@ -249,7 +249,7 @@ func unmarshalArray(data []byte, v reflect.Value) error {
 		case CyBufType_String:
 			realValue = bytes2string(value[1 : len(value)-1])
 		case CyBufType_Array:
-			array := reflect.New(typ).Elem()
+			array := reflect.MakeSlice(typ,1,2)
 			err = unmarshalArray(value, array)
 			if err != nil {
 				return err
@@ -273,7 +273,6 @@ func unmarshalArray(data []byte, v reflect.Value) error {
 					return err
 				}
 				realValue = object
-				//tmpSlice = append(tmpSlice, reflect.ValueOf(&object).Elem())
 			}
 		}
 
