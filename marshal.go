@@ -33,7 +33,7 @@ func marshal(v interface{}) ([]byte, error) {
 	rv := v.(map[string]interface{})
 
 	for key, value := range rv {
-		cybufBytes = append(cybufBytes, []byte(key)...)
+		cybufBytes = append(cybufBytes, string2bytes(key)...)
 		cybufBytes = append(cybufBytes, ':')
 
 		valueBytes = valueBytes[:0]
@@ -106,7 +106,7 @@ func marshalStruct(v interface{}) ([]byte, error) {
 	for i := 0; i < rv.NumField(); i++ {
 		field := typeValue.Field(i)
 
-		cybufBytes = append(cybufBytes, []byte(field.Name)...)
+		cybufBytes = append(cybufBytes, string2bytes(field.Name)...)
 		cybufBytes = append(cybufBytes, ':')
 
 		valueBytes = valueBytes[:0]
@@ -259,7 +259,7 @@ func marshalIndent(v interface{}, tabCount int) ([]byte, error) {
 
 	for key, value := range rv {
 		cybufBytes = append(cybufBytes, tabs...)
-		cybufBytes = append(cybufBytes, []byte(key)...)
+		cybufBytes = append(cybufBytes, string2bytes(key)...)
 		cybufBytes = append(cybufBytes, ':', ' ')
 
 		valueBytes = valueBytes[:0]
@@ -322,7 +322,7 @@ func marshalStructIndent(v interface{}, tabCount int) ([]byte, error) {
 		field := typeValue.Field(i)
 
 		cybufBytes = append(cybufBytes, tabs...)
-		cybufBytes = append(cybufBytes, []byte(field.Name)...)
+		cybufBytes = append(cybufBytes, string2bytes(field.Name)...)
 		cybufBytes = append(cybufBytes, ':', ' ')
 
 		valueBytes = valueBytes[:0]
