@@ -220,8 +220,8 @@ func BenchmarkJsonUnmarshalMap(b *testing.B) {
 }
 
 func BenchmarkCyBufUnmarshalStruct(b *testing.B) {
-
 	people := People{}
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		err = Unmarshal(cybufBytes, &people)

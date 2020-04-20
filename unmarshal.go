@@ -142,7 +142,6 @@ func unmarshalStruct(data []byte, v interface{}) error {
 		valueStr = string(value)
 
 		field = rv.FieldByName(keyStr)
-		// debugLog.Println("value: "+string(value)+", valueType:", valueType)
 		switch valueType {
 		case CyBufType_Nil:
 			field.Set(reflect.Zero(field.Type()))

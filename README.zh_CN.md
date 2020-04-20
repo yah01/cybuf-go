@@ -13,23 +13,27 @@ CyBuf和JSON类似，但它们两者之间主要有三个不同：
 一份标准的CyBuf格式数据示例如下：
 ```javascript
 {
-	Name: "cybuf"
-	Age: 1
-	Weight: 100.2
-	School: {
-		Name: "Wuhan University"
-		Age: 120
-	}
-	Friends: [
-		{
-			Name: "Zerone"
-			Phone: 20200412
-		}
-		{
-			Name: "ACM"
-			Phone: 2333
-		}
-	]
+    Name: "yah01"
+    Age: 21
+    Weight: 100.2
+    Live: true
+    Friends: [
+        {
+            Name: "wmx"
+            Age: 100
+            Weight: 200.5
+            Live: false
+            Friends: nil
+            School: {
+                Name: "SHU"
+                Age: 114514
+            }
+        }
+    ]
+    School: {
+        Name: "Wuhan University"
+        Age: 120
+    }
 }
 ```
 
