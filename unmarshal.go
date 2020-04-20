@@ -107,15 +107,15 @@ func unmarshal(data []byte, v interface{}) error {
 
 func unmarshalStruct(data []byte, v reflect.Value) error {
 	var (
-		key []byte
-		keyStr       string
-		value []byte
-		valueStr     string
+		key       []byte
+		keyStr    string
+		value     []byte
+		valueStr  string
 		valueType CyBufType
 		err       error
 		//errChan   = make(chan error, 2)
-		typ       = v.Type()
-		field        reflect.Value
+		typ      = v.Type()
+		field    reflect.Value
 		fieldMap = make(map[string]reflect.Value)
 	)
 
@@ -139,11 +139,9 @@ func unmarshalStruct(data []byte, v reflect.Value) error {
 			return err
 		}
 
-		if key == nil && i == len(data) {
+		if key == nil && i >= len(data) {
 			break
 		}
-
-		var err error
 
 		keyStr = bytes2string(key)
 		valueStr = bytes2string(value)
@@ -207,6 +205,7 @@ func unmarshalArray(data []byte, v reflect.Value) error {
 		valueStr  string
 		valueType CyBufType
 		realValue interface{}
+		tmpSlice  []reflect.Value
 		typ       = v.Type().Elem()
 		err       error
 	)
@@ -230,7 +229,7 @@ func unmarshalArray(data []byte, v reflect.Value) error {
 				//Char:  rune(data[i]),
 			}
 		}
-		valueStr = string(value)
+		valueStr = bytes2string(value)
 
 		switch valueType {
 		case CyBufType_Nil:
@@ -247,12 +246,11 @@ func unmarshalArray(data []byte, v reflect.Value) error {
 		case CyBufType_Float:
 			realValue, _ = strconv.ParseFloat(valueStr, 64)
 		case CyBufType_String:
-			realValue = string(value[1 : len(value)-1])
+			realValue = bytes2string(value[1 : len(value)-1])
 		case CyBufType_Array:
 			array := reflect.New(typ).Elem()
 			err = unmarshalArray(value, array)
 			if err != nil {
-				// errorLog.Println(err)
 				return err
 			}
 			realValue = array.Interface()
@@ -264,6 +262,7 @@ func unmarshalArray(data []byte, v reflect.Value) error {
 				if err != nil {
 					return err
 				}
+				//tmpSlice = append(tmpSlice, object)
 				realValue = object.Interface()
 			} else {
 				object := make(map[string]interface{})
@@ -273,12 +272,16 @@ func unmarshalArray(data []byte, v reflect.Value) error {
 					return err
 				}
 				realValue = object
+				//tmpSlice = append(tmpSlice, reflect.ValueOf(&object).Elem())
 			}
 		}
 
-		//debugLog.Printf("append: %+v\n", realValue)
-		v.Set(reflect.Append(v, reflect.ValueOf(realValue)))
+		//if valueType != CyBufType_Array && valueType != CyBufType_Object {
+		tmpSlice = append(tmpSlice, reflect.ValueOf(realValue))
+		//}
 	}
+
+	v.Set(reflect.Append(v, tmpSlice...))
 
 	return nil
 }
