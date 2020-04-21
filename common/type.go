@@ -66,7 +66,7 @@ func GetBytesValueType(v []byte) CyBufType {
 	if IsNilType(v) {
 		return CyBufType_Nil
 	}
-	if IsBoolType(bytes2string(v)) {
+	if IsBoolType(Bytes2string(v)) {
 		return CyBufType_Bool
 	}
 	if IsIntegerValue(v) {
@@ -95,7 +95,7 @@ func GetBytesValueSimpleType(v []byte) CyBufType {
 	if IsNilType(v) {
 		return CyBufType_Nil
 	}
-	if IsBoolType(bytes2string(v)) {
+	if IsBoolType(Bytes2string(v)) {
 		return CyBufType_Bool
 	}
 	if IsIntegerValue(v) {

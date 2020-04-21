@@ -3,6 +3,7 @@ package cybuf
 import (
 	"io"
 	"unicode"
+	. "github.com/yah01/cybuf-go/common"
 )
 
 const (
