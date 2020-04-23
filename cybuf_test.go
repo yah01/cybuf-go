@@ -78,7 +78,7 @@ var (
 )
 
 func init() {
-	MarshalSep = ' '
+	marshalSep = ' '
 	if cybufBytes, err = Marshal(people); err != nil {
 		panic(err)
 	}
@@ -106,8 +106,8 @@ func TestCyBufMarshalMap(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	//if !bytes.Equal(_, cybufBytes) {
-	//	t.Error(string(_),string(cybufBytes))
+	//if !bytes.Equal(tBytes, cybufBytes) {
+	//	t.Error(string(tBytes),string(cybufBytes))
 	//}
 }
 
