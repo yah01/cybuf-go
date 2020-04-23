@@ -11,6 +11,7 @@ const (
 	CyBufType_Nil
 	CyBufType_Bool
 	CyBufType_Integer
+	CyBufType_Char
 	CyBufType_Float
 	CyBufType_String
 	CyBufType_Array
