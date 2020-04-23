@@ -1,9 +1,9 @@
 package cybuf
 
 import (
+	. "github.com/yah01/cybuf-go/common"
 	"io"
 	"unicode"
-	. "github.com/yah01/cybuf-go/common"
 )
 
 const (
