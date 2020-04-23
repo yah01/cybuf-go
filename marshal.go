@@ -80,10 +80,10 @@ func marshal(v interface{}) ([]byte, error) {
 
 		cybufBytes = append(cybufBytes, valueBytes...)
 		if valueType != CyBufType_String && valueType != CyBufType_Array && valueType != CyBufType_Object {
-			cybufBytes = append(cybufBytes, MarshalSep)
+			cybufBytes = append(cybufBytes, marshalSep)
 		}
 	}
-	if cybufBytes[len(cybufBytes)-1] == MarshalSep {
+	if cybufBytes[len(cybufBytes)-1] == marshalSep {
 		cybufBytes[len(cybufBytes)-1] = '}'
 	} else {
 		cybufBytes = append(cybufBytes, '}')
@@ -153,10 +153,10 @@ func marshalStruct(v interface{}) ([]byte, error) {
 
 		cybufBytes = append(cybufBytes, valueBytes...)
 		if valueType != CyBufType_String && valueType != CyBufType_Array && valueType != CyBufType_Object {
-			cybufBytes = append(cybufBytes, MarshalSep)
+			cybufBytes = append(cybufBytes, marshalSep)
 		}
 	}
-	if cybufBytes[len(cybufBytes)-1] == MarshalSep {
+	if cybufBytes[len(cybufBytes)-1] == marshalSep {
 		cybufBytes[len(cybufBytes)-1] = '}'
 	} else {
 		cybufBytes = append(cybufBytes, '}')
@@ -222,10 +222,10 @@ func marshalArray(v interface{}) ([]byte, error) {
 
 		cybufBytes = append(cybufBytes, valueBytes...)
 		if valueType != CyBufType_String && valueType != CyBufType_Array && valueType != CyBufType_Object {
-			cybufBytes = append(cybufBytes, MarshalSep)
+			cybufBytes = append(cybufBytes, marshalSep)
 		}
 	}
-	if cybufBytes[len(cybufBytes)-1] == MarshalSep {
+	if cybufBytes[len(cybufBytes)-1] == marshalSep {
 		cybufBytes[len(cybufBytes)-1] = ']'
 	} else {
 		cybufBytes = append(cybufBytes, ']')
