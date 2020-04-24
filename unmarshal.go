@@ -297,7 +297,7 @@ func unmarshalArray(data []byte, v reflect.Value) error {
 		if cur >= v.Len() {
 			v.SetLen(cur + 1)
 		}
-		v.Index(cur).Set(reflect.ValueOf(realValue))
+		v.Index(cur).Set(reflect.ValueOf(realValue).Convert(v.Type().Elem()))
 		cur++
 	}
 
