@@ -55,7 +55,11 @@ func marshal(v interface{}) ([]byte, error) {
 		case CyBufType_Bool:
 			valueBytes = strconv.AppendBool(valueBytes, realValue.Bool())
 		case CyBufType_Integer:
-			valueBytes = strconv.AppendInt(valueBytes, realValue.Int(), 10)
+			if IsSignedInteger(realValue) {
+				valueBytes = strconv.AppendInt(valueBytes, realValue.Int(), 10)
+			} else {
+				valueBytes = strconv.AppendUint(valueBytes, realValue.Uint(), 10)
+			}
 		case CyBufType_Float:
 			valueBytes = strconv.AppendFloat(valueBytes, realValue.Float(), 'f', -1, 64)
 		case CyBufType_String:
@@ -128,7 +132,11 @@ func marshalStruct(v interface{}) ([]byte, error) {
 		case CyBufType_Bool:
 			valueBytes = strconv.AppendBool(valueBytes, realValue.Bool())
 		case CyBufType_Integer:
-			valueBytes = strconv.AppendInt(valueBytes, realValue.Int(), 10)
+			if IsSignedInteger(realValue) {
+				valueBytes = strconv.AppendInt(valueBytes, realValue.Int(), 10)
+			} else {
+				valueBytes = strconv.AppendUint(valueBytes, realValue.Uint(), 10)
+			}
 		case CyBufType_Float:
 			valueBytes = strconv.AppendFloat(valueBytes, realValue.Float(), 'f', -1, 64)
 		case CyBufType_String:
@@ -197,7 +205,11 @@ func marshalArray(v interface{}) ([]byte, error) {
 		case CyBufType_Bool:
 			valueBytes = strconv.AppendBool(valueBytes, realValue.Bool())
 		case CyBufType_Integer:
-			valueBytes = strconv.AppendInt(valueBytes, realValue.Int(), 10)
+			if IsSignedInteger(realValue) {
+				valueBytes = strconv.AppendInt(valueBytes, realValue.Int(), 10)
+			} else {
+				valueBytes = strconv.AppendUint(valueBytes, realValue.Uint(), 10)
+			}
 		case CyBufType_Float:
 			valueBytes = strconv.AppendFloat(valueBytes, realValue.Float(), 'f', -1, 64)
 		case CyBufType_String:
