@@ -163,8 +163,13 @@ func unmarshalStruct(data []byte, v reflect.Value) error {
 				field.SetBool(false)
 			}
 		case CyBufType_Integer:
-			intValue, _ := strconv.ParseInt(valueStr, 10, 64)
-			field.SetInt(intValue)
+			if IsSignedInteger(field) {
+				intValue, _ := strconv.ParseInt(valueStr, 10, 64)
+				field.SetInt(intValue)
+			} else {
+				uintValue, _ := strconv.ParseUint(valueStr, 10, 64)
+				field.SetUint(uintValue)
+			}
 		case CyBufType_Float:
 			floatValue, _ := strconv.ParseFloat(valueStr, 64)
 			field.SetFloat(floatValue)
