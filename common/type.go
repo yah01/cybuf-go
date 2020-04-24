@@ -43,7 +43,7 @@ func IsSignedInteger(rv reflect.Value) bool {
 	switch rv.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32:
 		return true
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32:
+	default:
 		return false
 	}
 }
