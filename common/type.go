@@ -29,13 +29,23 @@ func GetInterfaceValueType(v interface{}) CyBufType {
 		return CyBufType_Float
 	case reflect.String:
 		return CyBufType_String
-	case reflect.Slice,reflect.Array:
+	case reflect.Slice, reflect.Array:
 		return CyBufType_Array
-	case reflect.Map,reflect.Struct:
+	case reflect.Map, reflect.Struct:
 		return CyBufType_Object
 	}
-	
+
 	return CyBufType_Invalid
+}
+
+// v must be a CyBufType_Integer variable
+func IsSignedInteger(rv reflect.Value) bool {
+	switch rv.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32:
+		return true
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32:
+		return false
+	}
 }
 
 func GetReflectValueType(v reflect.Value) CyBufType {
