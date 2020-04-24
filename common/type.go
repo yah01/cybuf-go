@@ -1,6 +1,7 @@
 package cybuf
 
 import (
+	"log"
 	"reflect"
 )
 
@@ -19,6 +20,7 @@ const (
 )
 
 func GetInterfaceValueType(v interface{}) CyBufType {
+	log.Println(reflect.TypeOf(v).Name())
 	switch v.(type) {
 	case nil:
 		return CyBufType_Nil
@@ -32,14 +34,14 @@ func GetInterfaceValueType(v interface{}) CyBufType {
 		return CyBufType_String
 	}
 
-	realValue := reflect.ValueOf(v)
+	realValue := reflect.TypeOf(v)
 	if realValue.Kind() == reflect.Struct {
 		return CyBufType_Object
 	}
 
-	if realValue.IsZero() || realValue.IsNil() {
-		return CyBufType_Nil
-	}
+	//if realValue.IsZero() || realValue.IsNil() {
+	//	return CyBufType_Nil
+	//}
 	switch realValue.Kind() {
 	case reflect.Array, reflect.Slice:
 		return CyBufType_Array
