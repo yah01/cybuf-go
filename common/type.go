@@ -19,17 +19,24 @@ const (
 )
 
 func GetInterfaceValueType(v interface{}) CyBufType {
+<<<<<<< Updated upstream
 	switch v.(type) {
 	case nil:
 		return CyBufType_Nil
 	case bool:
+=======
+	realValue := reflect.TypeOf(v)
+	switch realValue.Kind() {
+	case reflect.Bool:
+>>>>>>> Stashed changes
 		return CyBufType_Bool
-	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32:
 		return CyBufType_Integer
-	case float32, float64:
+	case reflect.Float32, reflect.Float64:
 		return CyBufType_Float
-	case []byte, []rune, string:
+	case reflect.String:
 		return CyBufType_String
+<<<<<<< Updated upstream
 	}
 
 	realValue := reflect.ValueOf(v)
@@ -44,9 +51,18 @@ func GetInterfaceValueType(v interface{}) CyBufType {
 	case reflect.Array, reflect.Slice:
 		return CyBufType_Array
 	case reflect.Map:
+=======
+	case reflect.Slice,reflect.Array:
+		return CyBufType_Array
+	case reflect.Map,reflect.Struct:
 		return CyBufType_Object
 	}
 
+	if realValue.Kind() == reflect.Struct {
+>>>>>>> Stashed changes
+		return CyBufType_Object
+	}
+	
 	return CyBufType_Invalid
 }
 
