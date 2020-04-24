@@ -69,9 +69,9 @@ func unmarshal(data []byte, v interface{}) error {
 			(*rv)[keyStr] = nil
 		case CyBufType_Bool:
 			switch valueStr {
-			case "true", "True":
+			case "true":
 				(*rv)[keyStr] = true
-			case "false", "False":
+			case "false":
 				(*rv)[keyStr] = false
 			}
 		case CyBufType_Integer:

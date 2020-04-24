@@ -113,7 +113,7 @@ func IsNilType(v []byte) bool {
 }
 
 func IsBoolType(v string) bool {
-	return v == "true" || v == "True" || v == "false" || v == "False"
+	return v == "true" || v == "false"
 }
 
 func IsIntegerValue(v []byte) bool {
