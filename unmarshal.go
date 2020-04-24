@@ -3,6 +3,7 @@ package cybuf
 import (
 	"bytes"
 	. "github.com/yah01/cybuf-go/common"
+	"io/ioutil"
 	"reflect"
 	"strconv"
 )
@@ -28,6 +29,14 @@ func Unmarshal(data []byte, v interface{}) error {
 		}
 	}
 	return nil
+}
+
+func Load(fileName string, v interface{}) error {
+	cybufBytes, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		return err
+	}
+	return Unmarshal(cybufBytes, v)
 }
 
 func unmarshal(data []byte, v interface{}) error {
@@ -113,14 +122,10 @@ func unmarshalStruct(data []byte, v reflect.Value) error {
 		valueStr  string
 		valueType CyBufType
 		err       error
-		//errChan   = make(chan error, 2)
-		typ      = v.Type()
-		field    reflect.Value
-		fieldMap = make(map[string]reflect.Value)
+		typ       = v.Type()
+		field     reflect.Value
+		fieldMap  = make(map[string]reflect.Value)
 	)
-
-	//debugLog.Println("unmarshalStruct")
-	//debugLog.Println("unmarshal data:", string(data))
 
 	data = bytes.TrimSpace(data)
 	for data[0] == '{' && data[len(data)-1] == '}' {
@@ -132,7 +137,6 @@ func unmarshalStruct(data []byte, v reflect.Value) error {
 	}
 
 	for i := 0; i < len(data); {
-
 		key, value, valueType, i, err = NextKeyValuePair(data, i)
 		if err != nil {
 			// errorLog.Println(err)

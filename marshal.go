@@ -2,9 +2,10 @@ package cybuf
 
 import (
 	"bytes"
+	. "github.com/yah01/cybuf-go/common"
+	"io/ioutil"
 	"reflect"
 	"strconv"
-	. "github.com/yah01/cybuf-go/common"
 )
 
 type Marshaler interface {
@@ -20,6 +21,14 @@ func Marshal(v interface{}) ([]byte, error) {
 	}
 
 	return nil, nil
+}
+
+func Save(v interface{}, fileName string) error {
+	cybufBytes, err := Marshal(v)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(fileName, cybufBytes, 0644)
 }
 
 func marshal(v interface{}) ([]byte, error) {
