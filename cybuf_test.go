@@ -78,7 +78,6 @@ var (
 )
 
 func init() {
-	marshalSep = ' '
 	if cybufBytes, err = Marshal(people); err != nil {
 		panic(err)
 	}
