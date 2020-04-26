@@ -5,46 +5,42 @@ import (
 	"reflect"
 )
 
-type InvalidUnmarshalError struct {
-	Type reflect.Type
-}
-
-func (e *InvalidUnmarshalError) Error() string {
-	if e.Type == nil {
-		return "cybuf: UnmarshalCyBuf(nil)"
-	}
-
-	if e.Type.Kind() != reflect.Ptr {
-		return "cybuf: UnmarshalCyBuf(non-pointer " + e.Type.String() + ")"
-	}
-	return "cybuf: UnmarshalCyBuf(nil " + e.Type.String() + ")"
-}
-
-type ParseStage string
-
-const (
-	ParseStage_Key   ParseStage = "key"
-	ParseStage_Colon ParseStage = "colon"
-	ParseStage_Value ParseStage = "value"
+type (
+	MarshalStage   string
+	UnmarshalStage string
+	MarshalInfo    string
+	UnmarshalInfo  string
 )
 
-type ParseError struct {
-	Stage ParseStage
-	Index int
-	Char  rune
-}
-
-func (e *ParseError) Error() string {
-	return fmt.Sprintf("cybuf: Can't parse from %d(%s) when finding %s", e.Index, string(e.Char), e.Stage)
-}
-
-type DecodeError string
-
 const (
-	DecodeError_Not_Found_Begin DecodeError = "not found beginning('{')"
-	DecodeError_Not_Found_End   DecodeError = "not found ending('}')"
+	ParseStage_Key   MarshalStage = "key"
+	ParseStage_Colon MarshalStage = "colon"
+	ParseStage_Value MarshalStage = "value"
 )
 
-func (e DecodeError) Error() string {
-	return fmt.Sprintf("cybuf: Error happens when decoding: %s", e)
+type MarshalError struct {
+	Position int
+	Type     reflect.Type
+	Stage    MarshalStage
+	Info     MarshalInfo
+}
+
+func NewMarshalError(position int, typ reflect.Type, stage MarshalStage, info MarshalInfo) *MarshalError {
+	return &MarshalError{
+		Position: position,
+		Type:     typ,
+		Stage:    stage,
+		Info:     info,
+	}
+}
+
+func (e *MarshalError) Error() string {
+	return fmt.Sprintf("cybuf: Marshal error when parsing %s at %d with type %+v: %s", e.Stage, e.Position, e.Type, e.Info)
+}
+
+type UnmarshalError struct {
+	Position int
+	Type     CyBufType
+	Stage    UnmarshalStage
+	Info     UnmarshalInfo
 }

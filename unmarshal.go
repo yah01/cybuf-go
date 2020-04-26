@@ -220,9 +220,6 @@ func unmarshalArray(data []byte, v reflect.Value) error {
 		cur       int
 	)
 
-	//debugLog.Println("unmarshalArray")
-	//debugLog.Println("unmarshal array data:", string(data))
-
 	data = bytes.TrimSpace(data)
 	data = data[1 : len(data)-1]
 
