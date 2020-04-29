@@ -110,30 +110,18 @@ func NextKeyValuePair(data []byte, offset int) ([]byte, []byte, CyBufType, int, 
 		if offset == len(data) {
 			return nil, nil, valueType, offset, nil
 		}
-		return nil, nil, valueType, offset, &ParseError{
-			Stage: ParseStage_Key,
-			Index: offset,
-			Char:  rune(data[offset]),
-		}
+		return nil, nil, valueType, offset, NewUnmarshalError(offset, valueType, UnmarshalStage_Key, UnmarshalInfo_NoKey)
 	}
 	// debugLog.Println("key:", string(key))
 
 	offset = NextColon(data, offset)
 	if data[offset-1] != ':' {
-		return nil, nil, valueType, offset, &ParseError{
-			Stage: ParseStage_Colon,
-			Index: offset,
-			Char:  rune(data[offset]),
-		}
+		return nil, nil, valueType, offset, NewUnmarshalError(offset, valueType, UnmarshalStage_Colon, UnmarshalInfo_NoColon)
 	}
 
 	value, valueType, offset = NextValue(data, offset)
 	if value == nil {
-		return nil, nil, valueType, offset, &ParseError{
-			Stage: ParseStage_Value,
-			Index: offset,
-			//Char:  data[offset],
-		}
+		return nil, nil, valueType, offset, NewUnmarshalError(offset, valueType, UnmarshalStage_Value, UnmarshalInfo_NoValue)
 	}
 	// debugLog.Println("value:", string(value))
 

@@ -2,6 +2,7 @@ package cybuf
 
 import (
 	"bytes"
+	"errors"
 	. "github.com/yah01/cybuf-go/common"
 	"io/ioutil"
 	"reflect"
@@ -12,12 +13,14 @@ type Unmarshaler interface {
 	UnmarshalCyBuf(data []byte) error
 }
 
+const (
+	NotPointerError = "cybuf: v is not a pointer"
+)
+
 func Unmarshal(data []byte, v interface{}) error {
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Ptr {
-		return &InvalidUnmarshalError{
-			Type: reflect.TypeOf(v),
-		}
+		return errors.New(NotPointerError)
 	}
 
 	if rv.Elem().Kind() == reflect.Map {
@@ -62,7 +65,6 @@ func unmarshal(data []byte, v interface{}) error {
 
 		key, value, valueType, i, err = NextKeyValuePair(data, i)
 		if err != nil {
-			// errorLog.Println(err)
 			return err
 		}
 
@@ -230,11 +232,7 @@ func unmarshalArray(data []byte, v reflect.Value) error {
 			if i >= len(data) {
 				break
 			}
-			return &ParseError{
-				Stage: ParseStage_Value,
-				Index: i,
-				//Char:  rune(data[i]),
-			}
+			return NewUnmarshalError(i, valueType, UnmarshalStage_Value, UnmarshalInfo_NoValue)
 		}
 		valueStr = Bytes2string(value)
 
