@@ -5,6 +5,7 @@ import (
 	"errors"
 	. "github.com/yah01/cybuf-go/common"
 	"io/ioutil"
+	"log"
 	"reflect"
 	"strconv"
 )
@@ -28,13 +29,13 @@ func Unmarshal(data []byte, v interface{}) error {
 
 	switch rv.Elem().Kind() {
 	case reflect.Map:
-		return unmarshal(data,v)
+		return unmarshal(data, v)
 	case reflect.Struct:
 		return unmarshalStruct(data, rv.Elem())
-	case reflect.Slice,reflect.Array:
-		return unmarshalArray(data,rv.Elem())
+	case reflect.Slice, reflect.Array:
+		return unmarshalArray(data, rv.Elem())
 	}
-	
+
 	return nil
 }
 
@@ -297,6 +298,7 @@ func unmarshalArray(data []byte, v reflect.Value) error {
 			v.SetLen(cur + 1)
 		}
 		v.Index(cur).Set(reflect.ValueOf(realValue).Convert(v.Type().Elem()))
+		log.Printf("slice value: %+v\n", v)
 		cur++
 	}
 
