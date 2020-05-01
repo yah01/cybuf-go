@@ -1,9 +1,7 @@
 package cybuf
 
 import (
-	. "github.com/yah01/cybuf-go/common"
 	"io"
-	"unicode"
 )
 
 const (
@@ -24,70 +22,70 @@ func NewDecoder(r io.Reader) *Decoder {
 	}
 }
 
-func (dec *Decoder) Decode(v interface{}) error {
-	var (
-		c              byte
-		quote          byte
-		leftBraceCount int
-		cybuf          []byte
-		err            error
-	)
-
-	// Skip space character
-	for c, err = dec.read(); err == nil && c != 0; c, err = dec.read() {
-		if unicode.IsSpace(rune(c)) {
-			continue
-		}
-	}
-	if err != nil {
-		return err
-	}
-
-	if c, err = dec.read(); err != nil {
-		return err
-	}
-	if c != '{' {
-		return DecodeError_Not_Found_Begin
-	}
-	leftBraceCount = 1
-	cybuf = append(cybuf, c)
-
-	for c, err = dec.read(); err == nil && c != 0; c, err = dec.read() {
-		if quote == 0 {
-			switch c {
-			case '"', '\'':
-				quote = c
-			case '{':
-				leftBraceCount++
-			case '}':
-				leftBraceCount--
-			}
-		} else {
-			switch c {
-			case quote:
-				quote = 0
-			}
-		}
-
-		cybuf = append(cybuf, c)
-		if leftBraceCount == 0 {
-			break
-		}
-	}
-	if err != nil {
-		return err
-	}
-
-	if cybuf[len(cybuf)-1] != '}' {
-		return DecodeError_Not_Found_End
-	}
-
-	if err = Unmarshal(cybuf, v); err != nil {
-		return err
-	}
-
-	return nil
-}
+//func (dec *Decoder) Decode(v interface{}) error {
+//	var (
+//		c              byte
+//		quote          byte
+//		leftBraceCount int
+//		cybuf          []byte
+//		err            error
+//	)
+//
+//	// Skip space character
+//	for c, err = dec.read(); err == nil && c != 0; c, err = dec.read() {
+//		if unicode.IsSpace(rune(c)) {
+//			continue
+//		}
+//	}
+//	if err != nil {
+//		return err
+//	}
+//
+//	if c, err = dec.read(); err != nil {
+//		return err
+//	}
+//	if c != '{' {
+//		return DecodeError_Not_Found_Begin
+//	}
+//	leftBraceCount = 1
+//	cybuf = append(cybuf, c)
+//
+//	for c, err = dec.read(); err == nil && c != 0; c, err = dec.read() {
+//		if quote == 0 {
+//			switch c {
+//			case '"', '\'':
+//				quote = c
+//			case '{':
+//				leftBraceCount++
+//			case '}':
+//				leftBraceCount--
+//			}
+//		} else {
+//			switch c {
+//			case quote:
+//				quote = 0
+//			}
+//		}
+//
+//		cybuf = append(cybuf, c)
+//		if leftBraceCount == 0 {
+//			break
+//		}
+//	}
+//	if err != nil {
+//		return err
+//	}
+//
+//	if cybuf[len(cybuf)-1] != '}' {
+//		return DecodeError_Not_Found_End
+//	}
+//
+//	if err = Unmarshal(cybuf, v); err != nil {
+//		return err
+//	}
+//
+//	return nil
+//}
 
 func (dec *Decoder) read() (byte, error) {
 	end, err := dec.readBlock()
