@@ -26,14 +26,15 @@ func Unmarshal(data []byte, v interface{}) error {
 		return errors.New(NotPointerError)
 	}
 
-	if rv.Elem().Kind() == reflect.Map {
-		return unmarshal(data, v)
-	} else {
-		err := unmarshalStruct(data, rv.Elem())
-		if err != nil {
-			return err
-		}
+	switch rv.Elem().Kind() {
+	case reflect.Map:
+		return unmarshal(data,v)
+	case reflect.Struct:
+		return unmarshalStruct(data, rv.Elem())
+	case reflect.Slice,reflect.Array:
+		return unmarshalArray(data,rv.Elem())
 	}
+	
 	return nil
 }
 
