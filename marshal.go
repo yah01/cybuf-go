@@ -18,6 +18,8 @@ func Marshal(v interface{}) ([]byte, error) {
 		return marshal(v)
 	} else if kind == reflect.Struct {
 		return marshalStruct(v)
+	} else if kind == reflect.Slice || kind == reflect.Array {
+		return marshalArray(v)
 	}
 
 	return nil, nil
@@ -221,7 +223,7 @@ func handleMarshal(valueType CyBufType, valueBytes []byte, realValue reflect.Val
 		//log.Println("realValue.Kind():",realValue.Type().Kind().String())
 		if realValue.Kind() == reflect.Map || realValue.Kind() == reflect.Interface {
 			objectBytes, err = marshal(realValue.Interface())
-		} else  {
+		} else {
 			objectBytes, err = marshalStruct(realValue.Interface())
 		}
 		if err != nil {
