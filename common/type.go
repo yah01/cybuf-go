@@ -23,7 +23,7 @@ func GetInterfaceValueType(v interface{}) CyBufType {
 	switch realValue.Kind() {
 	case reflect.Bool:
 		return CyBufType_Bool
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32:
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		return CyBufType_Integer
 	case reflect.Float32, reflect.Float64:
 		return CyBufType_Float
