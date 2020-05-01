@@ -18,6 +18,9 @@ const (
 )
 
 func Unmarshal(data []byte, v interface{}) error {
+	if len(data) == 0 {
+		return nil
+	}
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Ptr {
 		return errors.New(NotPointerError)
